@@ -17,11 +17,11 @@ async function runAsync() {
 
 	try {
 		await integrateAsync(args[2]);
-		console.log(colors.brightGreen.inverse("\n   SUCCESS   \n"));
+		console.log(colors.brightGreen.inverse("\n   INTEGRATION SUCCEEDED   \n"));
 	}
 	catch (err) {
 		process.stdout.write(
-			colors.brightRed.inverse("\n   FAILED   \n") +
+			colors.brightRed.inverse("\n   INTEGRATION FAILED   \n") +
 			colors.brightRed(`${err.message}\n\n`)
 		);
 	}
