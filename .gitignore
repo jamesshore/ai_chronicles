@@ -1,0 +1,12 @@
+# Build artifacts
+/generated/
+/node_modules/
+/src/front_end/node_modules/
+
+# MacOS
+.DS_Store
+
+# JetBrains IDEs
+/.idea/workspace.xml
+/.idea/shelf/
+/.idea/usage.statistics.xml
