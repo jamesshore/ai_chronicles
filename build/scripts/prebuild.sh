@@ -1,4 +1,3 @@
 # Prerequisites to run tests or local server
 
-cd build
-[ ! -f node_modules/.bin/mocha ] && echo "Installing packages..." && npm install
+echo "Installing build packages..." && npm --prefix=build install
