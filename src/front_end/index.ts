@@ -1,5 +1,5 @@
 // Copyright Titanium I.T. LLC.
 
-const name: string = "you";
+const foo: string = "you";
 
-console.log(`Hello ${name}`);
+console.log(`Hello ${foo}`);

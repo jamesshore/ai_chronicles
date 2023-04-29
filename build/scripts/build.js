@@ -22,8 +22,6 @@ const rootDir = pathToFile(import.meta.url, "../..");
 const build = new Build({ incrementalDir: `${paths.incrementalDir}/tasks/` });
 const analysis = new DependencyAnalysis(build, rootDir, paths.testDependencies());
 
-const TYPESCRIPT_COMPILER = process.platform === "win32" ? "node_modules\\.bin\\tsc.cmd" : "node_modules/.bin/tsc";
-
 export async function runBuildAsync(args) {
 	try {
 		await build.runAsync(args, successColor.inverse("   BUILD OK   "));
@@ -84,14 +82,12 @@ build.incrementalTask("test", paths.testDependencies(), async () => {
 });
 
 build.incrementalTask("compile", paths.compilerDependencies(), async () => {
-	return; // disable for now
-
 	process.stdout.write("Compiling: ");
 
-	const { code } = await sh.runInteractiveAsync(TYPESCRIPT_COMPILER, []);
+	const { code } = await sh.runInteractiveAsync(paths.typescriptCompiler, []);
 	process.stdout.write(".");
 	if (code !== 0) throw new Error("Compile failed");
-	copyPackageJsonFiles();
+	// copyPackageJsonFiles();
 	process.stdout.write("\n");
 
 	function copyPackageJsonFiles() {

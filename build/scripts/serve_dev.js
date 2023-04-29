@@ -19,7 +19,7 @@ const errorColor = colors.brightRed.inverse;
 
 const COMMAND = [
 	`${paths.buildDir}/node_modules/.bin/http-server`,
-	paths.frontEndDir,
+	paths.typescriptDir,
 	"--port", "5010",
 	"-c-1", // disable caching
 ];

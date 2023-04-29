@@ -15,6 +15,7 @@ export const incrementalDir = `${generatedDir}/incremental`;
 export const typescriptDir = `${generatedDir}/typescript`;
 
 export const buildScript = `${rootDir}/build.sh`;
+export const typescriptCompiler = `${buildDir}/node_modules/.bin/tsc`;
 
 export const watchFiles = memoizedDeglob([
 	`${buildDir}/**/*`,
@@ -32,7 +33,6 @@ export const watchRestartFiles = memoizedDeglob([
 
 export const lintFiles = memoizedDeglob([
 	`${buildDir}/**/*.js`,
-	`${frontEndDir}/**/*.js`,
 	`${frontEndDir}/**/*.ts`,
 	`${frontEndDir}/**/*.tsx`,
 ], [
