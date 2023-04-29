@@ -1,12 +1,16 @@
 // Copyright Titanium I.T. LLC. All rights reserved. For license, see "README" or "LICENSE" file.
 import glob from "glob";
+import { pathToFile } from "../util/module_paths.js";
 
-export const buildDir = "build";
-export const srcDir = "src";
-export const frontEndSrcDir = "src/front_end";
-export const backEndSrcDir = "src/back_end";
+export const rootDir = pathToFile(import.meta.url, "../..");
 
-export const generatedDir = "generated";
+export const buildDir = `${rootDir}/build`;
+
+export const srcDir = `${rootDir}/src`;
+export const frontEndDir = `${srcDir}/front_end`;
+export const backEndDir = `${srcDir}/back_end`;
+
+export const generatedDir = `${rootDir}/generated`;
 export const incrementalDir = `${generatedDir}/incremental`;
 export const typescriptDir = `${generatedDir}/typescript`;
 
@@ -17,34 +21,33 @@ export const watchFiles = memoizedDeglob([
 
 export const watchRestartFiles = memoizedDeglob([
 	`${buildDir}/**/*`,
-	`package.json`,
-	`tsconfig.json`,
-	`*.sh`,
+	`${rootDir}/package.json`,
+	`${rootDir}/tsconfig.json`,
+	`${rootDir}/*.sh`,
 ], [
 	`${buildDir}/node_modules/**/*`,
 ]);
 
 export const lintFiles = memoizedDeglob([
-	`*.js`,
 	`${buildDir}/**/*.js`,
-	`${frontEndSrcDir}/**/*.js`,
+	`${frontEndDir}/**/*.ts`,
+	`${frontEndDir}/**/*.tsx`,
+], [
+	`${buildDir}/node_modules/**/*`,
 ]);
 
 export const sourcePackages = memoizedDeglob([
-	`${frontEndSrcDir}/**/package.json`,
+	`${frontEndDir}/**/package.json`,
 ]);
 
 export const compilerDependencies = memoizedDeglob([
 	...sourcePackages(),
-	`${frontEndSrcDir}/**/*.ts`,
+	`${frontEndDir}/**/*.ts`,
 ]);
 
 export const testFiles = memoizedDeglob([
 	`${buildDir}/**/_*_test.js`,
 	`${generatedDir}/typescript/**/_*_test.js`,
-	`${generatedDir}/typescript/**/_*_test.cjs`,
-	`${generatedDir}/typescript/**/_*_test.js`,
-	`${generatedDir}/typescript/**/_*_test.ts`,
 ]);
 
 export const testDependencies = memoizedDeglob([

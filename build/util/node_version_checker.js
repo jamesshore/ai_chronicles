@@ -2,11 +2,12 @@
 
 import Colors from "./colors.js";
 import { readFileSync } from "node:fs";
+import * as paths from "../config/paths.js";
 
 export function checkNodeVersion() {
 	console.log("Checking Node.js version: .");
 
-	const packageJson = JSON.parse(readFileSync("package.json", "utf-8"));
+	const packageJson = JSON.parse(readFileSync(`${paths.buildDir}/package.json`, "utf-8"));
 
 	const expectedVersion = "v" + packageJson.engines.node;
 	const actualVersion = process.version;
