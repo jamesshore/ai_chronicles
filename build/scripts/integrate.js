@@ -31,9 +31,6 @@ async function integrateAsync(message) {
 	writeHeader("Checking repository");
 	await ensureNothingToCheckIn("Commit changes before integrating");
 
-	writeHeader("Checking npm");
-	await ensureNpmBuildFilesAreIgnored();
-
 	writeHeader("Validating build");
 	await validateBuildAsync(branches.dev);
 
@@ -68,13 +65,15 @@ async function mergeBranchesAsync(message) {
 }
 
 async function validateBuildAsync(branch) {
-try {
+	try {
 		await repo.runCodeInBranch(branch, async() => {
+			await repo.resetToFreshCheckoutAsync();
 			await repo.runBuildAsync();
+			await ensureNothingToCheckIn("Repo has uncommitted changes after build");
 		});
 	}
 	catch (err) {
-		throw new Error(`${branch} failed build`);
+		throw new Error(`${branch} failed build: ${err.message}`);
 	}
 }
 

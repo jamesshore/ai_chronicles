@@ -14,6 +14,8 @@ export const generatedDir = `${rootDir}/generated`;
 export const incrementalDir = `${generatedDir}/incremental`;
 export const typescriptDir = `${generatedDir}/typescript`;
 
+export const buildScript = `${rootDir}/build.sh`;
+
 export const watchFiles = memoizedDeglob([
 	`${buildDir}/**/*`,
 	`${srcDir}/**/*`,
