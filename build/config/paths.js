@@ -32,10 +32,12 @@ export const watchRestartFiles = memoizedDeglob([
 
 export const lintFiles = memoizedDeglob([
 	`${buildDir}/**/*.js`,
+	`${frontEndDir}/**/*.js`,
 	`${frontEndDir}/**/*.ts`,
 	`${frontEndDir}/**/*.tsx`,
 ], [
 	`${buildDir}/node_modules/**/*`,
+	`${frontEndDir}/node_modules/**/*`,
 ]);
 
 export const sourcePackages = memoizedDeglob([

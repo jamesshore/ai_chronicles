@@ -84,6 +84,8 @@ build.incrementalTask("test", paths.testDependencies(), async () => {
 });
 
 build.incrementalTask("compile", paths.compilerDependencies(), async () => {
+	return; // disable for now
+
 	process.stdout.write("Compiling: ");
 
 	const { code } = await sh.runInteractiveAsync(TYPESCRIPT_COMPILER, []);
