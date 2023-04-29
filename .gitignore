@@ -1,6 +1,6 @@
 # Build artifacts
 /generated/
-/node_modules/
+/build/node_modules/
 /src/front_end/node_modules/
 
 # MacOS

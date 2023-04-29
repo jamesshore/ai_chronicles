@@ -1,4 +1,6 @@
 #!/bin/sh
 
 . build/scripts/prebuild.sh
-node build/scripts/run_build.js "$@"
+
+cd build
+node scripts/run_build.js "$@"

@@ -2,16 +2,12 @@
 
 import * as sh from "./sh.js";
 import Colors from "./colors.js";
+import * as paths from "../config/paths.js";
 
 // Functions to do things to the git repository
 
 export async function runBuildAsync() {
-	if (process.platform === "win32") {
-		await runAsync(".\\build.cmd");
-	}
-	else {
-		await runAsync("./build.sh");
-	}
+	await runAsync(paths.buildScript);
 }
 
 export async function hasUncommittedChangesAsync() {
