@@ -10,18 +10,22 @@ import gaze from "gaze";
 import pathLib from "node:path";
 import { spawn } from "node:child_process";
 import * as paths from "../config/paths.js";
-import Colors from "../util/colors.js";
-import { pathToFile } from "../util/module_paths.js";
+import colors from "../util/colors.js";
 
 checkNodeVersion();
 
-const watchColor = Colors.cyan;
-const errorColor = Colors.brightRed.inverse;
+const watchColor = colors.cyan;
+const errorColor = colors.brightRed.inverse;
 
-const COMMAND = "node";
-const SERVE_JS = "generated/typescript/serve.js";
-const SERVE_FULL_PATH = pathToFile(import.meta.url, `../../${SERVE_JS}`);
-const COMMAND_ARGS = process.argv.slice(2);
+const COMMAND = [
+	`${paths.buildDir}/node_modules/.bin/http-server`,
+	paths.frontEndDir,
+	"--port", "5010",
+	"-c-1", // disable caching
+];
+
+const commandName = pathLib.basename(COMMAND[0]);
+const commandArgs = COMMAND.slice(1);
 
 let child = null;
 
@@ -43,10 +47,10 @@ gaze(paths.watchFiles(), function(err, watcher) {
 function run() {
 	if (child) return;
 
-	console.log(watchColor(`> ${COMMAND} ${SERVE_JS} ${COMMAND_ARGS.join(" ")}`));
-	child = spawn(COMMAND, [ SERVE_FULL_PATH, ...COMMAND_ARGS ], { stdio: "inherit" });
+	console.log(watchColor(`> ${commandName} ${commandArgs.join(" ")}`));
+	child = spawn(COMMAND[0], commandArgs, { stdio: "inherit" });
 	child.on("exit", function() {
-		console.log(watchColor(`${COMMAND} exited\n`));
+		console.log(watchColor(`${commandName} exited\n`));
 		child = null;
 	});
 }
@@ -54,7 +58,7 @@ function run() {
 function kill(callback) {
 	if (child === null) return callback();
 
-	console.log(watchColor(`> kill ${COMMAND}`));
+	console.log(watchColor(`> kill ${commandName}`));
 	child.kill();
 	child.on("exit", callback);
 }
