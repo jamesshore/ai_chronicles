@@ -40,13 +40,14 @@ export const lintFiles = memoizedDeglob([
 	`${frontEndDir}/node_modules/**/*`,
 ]);
 
-export const sourcePackages = memoizedDeglob([
-	`${frontEndDir}/**/package.json`,
+export const frontEndStaticFiles = memoizedDeglob([
+	`${frontEndDir}/**/*.html`,
 ]);
 
 export const compilerDependencies = memoizedDeglob([
-	...sourcePackages(),
+	...frontEndStaticFiles(),
 	`${frontEndDir}/**/*.ts`,
+	`${frontEndDir}/**/*.tsx`,
 ]);
 
 export const testFiles = memoizedDeglob([

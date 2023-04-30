@@ -2,6 +2,7 @@
 
 import Build from "../util/build_runner.js";
 import DependencyAnalysis from "../util/dependency_analysis.js";
+import * as pathLib from "node:path";
 import * as paths from "../config/paths.js";
 import * as lint from "../util/lint_runner.js";
 import lintConfig from "../config/eslint.conf.js";
@@ -85,17 +86,17 @@ build.incrementalTask("compile", paths.compilerDependencies(), async () => {
 	process.stdout.write("Compiling: ");
 
 	const { code } = await sh.runInteractiveAsync(paths.typescriptCompiler, []);
-	process.stdout.write(".");
 	if (code !== 0) throw new Error("Compile failed");
-	// copyPackageJsonFiles();
+
+	copyFrontEndFiles();
 	process.stdout.write("\n");
 
-	function copyPackageJsonFiles() {
-		shell.rm("-rf", `${paths.typescriptDir}/**/*package.json`);
-		process.stdout.write(".");
-		paths.sourcePackages().forEach(packageJson => {
-			const relativePath = build.rootRelativePath(paths.srcDir, packageJson);
-			shell.cp(packageJson, `${paths.typescriptDir}/${relativePath}`);
+	function copyFrontEndFiles() {
+		paths.frontEndStaticFiles().forEach(file => {
+			const relativePath = build.rootRelativePath(paths.frontEndDir, file);
+			const destFile = `${paths.typescriptDir}/${relativePath}`;
+			shell.mkdir("-p", pathLib.dirname(destFile));
+			shell.cp(file, destFile);
 			process.stdout.write(".");
 		});
 	}
