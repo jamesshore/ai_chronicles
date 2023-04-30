@@ -1,5 +1,7 @@
 // Copyright Titanium I.T. LLC. All rights reserved. For license, see "README" or "LICENSE" file.
 
+// ESLint is our linter.
+
 const ERROR = "error";
 const IGNORE = "off";
 const UNSUPPORTED = "off";    // turned off because it doesn't work in JavaScript branch

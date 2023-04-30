@@ -5,6 +5,7 @@ import { pathToFile } from "../util/module_paths.js";
 export const rootDir = pathToFile(import.meta.url, "../..");
 
 export const buildDir = `${rootDir}/build`;
+const buildBinariesDir = `${buildDir}/node_modules/.bin`;
 
 export const srcDir = `${rootDir}/src`;
 export const frontEndDir = `${srcDir}/front_end`;
@@ -13,9 +14,12 @@ export const backEndDir = `${srcDir}/back_end`;
 export const generatedDir = `${rootDir}/generated`;
 export const incrementalDir = `${generatedDir}/incremental`;
 export const typescriptDir = `${generatedDir}/typescript`;
+export const bundleDir = `${generatedDir}/bundle`;
 
 export const buildScript = `${rootDir}/build.sh`;
-export const typescriptCompiler = `${buildDir}/node_modules/.bin/tsc`;
+export const typescriptCompiler = `${buildBinariesDir}/tsc`;
+export const bundler = `${buildBinariesDir}/rollup`;
+export const httpServer = `${buildBinariesDir}/http-server`;
 
 export const watchFiles = memoizedDeglob([
 	`${buildDir}/**/*`,

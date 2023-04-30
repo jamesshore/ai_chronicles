@@ -18,8 +18,8 @@ const watchColor = colors.cyan;
 const errorColor = colors.brightRed.inverse;
 
 const COMMAND = [
-	`${paths.buildDir}/node_modules/.bin/http-server`,
-	paths.typescriptDir,
+	paths.httpServer,
+	paths.bundleDir,
 	"--port", "5010",
 	"-c-1", // disable caching
 ];

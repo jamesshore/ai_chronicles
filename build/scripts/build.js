@@ -39,7 +39,7 @@ build.task("default", async() => {
 });
 
 build.task("quick", async () => {
-	await build.runTasksAsync([ "lint", "test" ]);
+	await build.runTasksAsync([ "lint", "bundle", "test" ]);
 });
 
 build.task("clean", () => {
@@ -82,24 +82,39 @@ build.incrementalTask("test", paths.testDependencies(), async () => {
 	});
 });
 
-build.incrementalTask("compile", paths.compilerDependencies(), async () => {
-	process.stdout.write("Compiling: ");
+build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
+	await build.runTasksAsync([ "compile" ]);
+	process.stdout.write("Bundling: ");
 
-	const { code } = await sh.runInteractiveAsync(paths.typescriptCompiler, []);
-	if (code !== 0) throw new Error("Compile failed");
+	const { code } = await sh.runInteractiveAsync(paths.bundler, [
+		"--failAfterWarnings",
+		"--silent",
+		"--config", `${paths.buildDir}/config/rollup.conf.js`,
+	]);
+	if (code !== 0) throw new Error("Bundler failed");
 
+	process.stdout.write(".");
 	copyFrontEndFiles();
 	process.stdout.write("\n");
 
 	function copyFrontEndFiles() {
 		paths.frontEndStaticFiles().forEach(file => {
 			const relativePath = build.rootRelativePath(paths.frontEndDir, file);
-			const destFile = `${paths.typescriptDir}/${relativePath}`;
+			const destFile = `${paths.bundleDir}/${relativePath}`;
 			shell.mkdir("-p", pathLib.dirname(destFile));
 			shell.cp(file, destFile);
 			process.stdout.write(".");
 		});
 	}
+});
+
+build.incrementalTask("compile", paths.compilerDependencies(), async () => {
+	process.stdout.write("Compiling: ");
+
+	const { code } = await sh.runInteractiveAsync(paths.typescriptCompiler, []);
+	if (code !== 0) throw new Error("Compile failed");
+
+	process.stdout.write(".\n");
 });
 
 
