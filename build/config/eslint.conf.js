@@ -1,5 +1,7 @@
 // Copyright Titanium I.T. LLC. All rights reserved. For license, see "README" or "LICENSE" file.
 
+// ESLint is our linter.
+
 const ERROR = "error";
 const IGNORE = "off";
 const UNSUPPORTED = "off";    // turned off because it doesn't work in JavaScript branch
@@ -7,17 +9,22 @@ const DEPRECATED = "off";     // turned off because this option has been depreca
 
 export default {
 	"parser": "@typescript-eslint/parser",
-	"plugins": [ "@typescript-eslint" ],
+	"plugins": [
+		"@typescript-eslint",
+	],
 
 	"parserOptions": {
 		"ecmaVersion": 2022,
 		"sourceType": "module",
+		"ecmaFeatures": {
+			"jsx": true,
+		},
 	},
 
 	"env": {
 		"node": true,
-		"commonjs": true,
-		"mocha": true
+		"mocha": true,
+		"browser": true,
 	},
 
 	"globals": {
