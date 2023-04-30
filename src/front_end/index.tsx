@@ -1,7 +1,12 @@
 // Copyright Titanium I.T. LLC.
+import { createRoot } from 'react-dom/client';
 
-const foo: string = "all";
+const domNode = document.getElementById('react-root');
+if (domNode === null) throw new Error("Couldn't find 'react-root' DOM element");
 
-console.log(`Hello ${foo}`);
+const root = createRoot(domNode);
+root.render(<Hello />);
 
-<div />;
+function Hello() {
+  return <h1>Hello from React!</h1>;
+}
