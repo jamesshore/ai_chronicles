@@ -11,6 +11,7 @@ export default {
 		file: paths.bundleFile,
 		format: "iife",
 		sourcemap: true,
+		intro: "const process = { env: {} };"   // shim Node.js 'process' object used by jsx-runtime
 	},
 	plugins: [
 		nodeResolve({
