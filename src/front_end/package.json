@@ -5,6 +5,7 @@
   "author": "James Shore <jshore@jamesshore.com> and Ted M. Young <ted@tedmyoung.com>",
   "license": "MIT",
   "dependencies": {
+    "@types/react-dom": "^18.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
