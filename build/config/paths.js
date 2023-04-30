@@ -12,9 +12,10 @@ export const frontEndDir = `${srcDir}/front_end`;
 export const backEndDir = `${srcDir}/back_end`;
 
 export const generatedDir = `${rootDir}/generated`;
-export const incrementalDir = `${generatedDir}/incremental`;
-export const typescriptDir = `${generatedDir}/typescript`;
+export const incrementalDir = `${generatedDir}/incremental-build`;
+export const typescriptDir = `${generatedDir}/compiled-typescript`;
 export const bundleDir = `${generatedDir}/bundle`;
+export const bundleFile = `${bundleDir}/bundle.js`;
 
 export const buildScript = `${rootDir}/build.sh`;
 export const typescriptCompiler = `${buildBinariesDir}/tsc`;

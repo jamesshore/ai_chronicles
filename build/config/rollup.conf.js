@@ -8,7 +8,7 @@ import commonJs from "@rollup/plugin-commonjs";
 export default {
 	input: `${paths.typescriptDir}/index.js`,
 	output: {
-		file: `${paths.bundleDir}/bundle.js`,
+		file: paths.bundleFile,
 		format: "iife",
 		sourcemap: true,
 	},

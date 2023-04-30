@@ -123,5 +123,5 @@ function lintDependencyName(filename) {
 }
 
 function dependencyName(filename, extension) {
-	return `${paths.incrementalDir}/incremental/${build.rootRelativePath(rootDir, filename)}.${extension}`;
+	return `${paths.incrementalDir}/files/${build.rootRelativePath(rootDir, filename)}.${extension}`;
 }
