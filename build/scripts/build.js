@@ -35,11 +35,11 @@ export async function runBuildAsync(args) {
 }
 
 build.task("default", async() => {
-	await build.runTasksAsync([ "clean", "typecheck", "quick" ]);
+	await build.runTasksAsync([ "clean", "quick", "bundle", "typecheck" ]);
 });
 
 build.task("quick", async () => {
-	await build.runTasksAsync([ "lint", "bundle", "test" ]);
+	await build.runTasksAsync([ "lint", "test" ]);
 });
 
 build.task("clean", () => {
@@ -123,9 +123,6 @@ build.incrementalTask("compile", paths.compilerDependencies(), async () => {
 });
 
 build.incrementalTask("typecheck", paths.compilerDependencies(), async () => {
-	return;   // temporarily disable
-
-
 	process.stdout.write("Type-checking JavaScript: ");
 
 	const { code } = await sh.runInteractiveAsync(paths.tsc, []);
