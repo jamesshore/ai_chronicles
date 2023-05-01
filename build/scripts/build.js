@@ -35,11 +35,11 @@ export async function runBuildAsync(args) {
 }
 
 build.task("default", async() => {
-	await build.runTasksAsync([ "clean", "quick" ]);
+	await build.runTasksAsync([ "clean", "quick", "bundle", "typecheck" ]);
 });
 
 build.task("quick", async () => {
-	await build.runTasksAsync([ "lint", "bundle", "test" ]);
+	await build.runTasksAsync([ "lint", "test" ]);
 });
 
 build.task("clean", () => {
@@ -48,7 +48,7 @@ build.task("clean", () => {
 });
 
 build.task("lint", async () => {
-	let header = "Linting: ";
+	let header = "Linting JavaScript: ";
 	let footer = "";
 
 	const lintPromises = paths.lintFiles().map(async (lintFile) => {
@@ -75,7 +75,7 @@ build.task("lint", async () => {
 build.incrementalTask("test", paths.testDependencies(), async () => {
 	await build.runTasksAsync([ "compile" ]);
 
-	process.stdout.write("Testing: ");
+	process.stdout.write("Testing JavaScript: ");
 	await runMochaAsync({
 		files: paths.testFiles(),
 		options: mochaConfig,
@@ -84,12 +84,12 @@ build.incrementalTask("test", paths.testDependencies(), async () => {
 
 build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
 	await build.runTasksAsync([ "compile" ]);
-	process.stdout.write("Bundling: ");
+	process.stdout.write("Bundling JavaScript: ");
 
 	const { code } = await sh.runInteractiveAsync(paths.bundler, [
 		"--failAfterWarnings",
 		"--silent",
-		"--config", `${paths.buildDir}/config/rollup.conf.js`,
+		"--config", `${paths.configDir}/rollup.conf.js`,
 	]);
 	if (code !== 0) throw new Error("Bundler failed");
 
@@ -109,10 +109,24 @@ build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
 });
 
 build.incrementalTask("compile", paths.compilerDependencies(), async () => {
-	process.stdout.write("Compiling: ");
+	process.stdout.write("Compiling JavaScript: ");
 
-	const { code } = await sh.runInteractiveAsync(paths.typescriptCompiler, []);
+	const { code } = await sh.runInteractiveAsync(paths.swc, [
+		"--config-file", `${paths.configDir}/swc.conf.json`,
+		"--out-dir", paths.typescriptDir,
+		"--quiet",
+		paths.frontEndDir
+	]);
 	if (code !== 0) throw new Error("Compile failed");
+
+	process.stdout.write(".\n");
+});
+
+build.incrementalTask("typecheck", paths.compilerDependencies(), async () => {
+	process.stdout.write("Type-checking JavaScript: ");
+
+	const { code } = await sh.runInteractiveAsync(paths.tsc, []);
+	if (code !== 0) throw new Error("Type check failed");
 
 	process.stdout.write(".\n");
 });

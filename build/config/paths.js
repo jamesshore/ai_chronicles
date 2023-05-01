@@ -5,6 +5,7 @@ import { pathToFile } from "../util/module_paths.js";
 export const rootDir = pathToFile(import.meta.url, "../..");
 
 export const buildDir = `${rootDir}/build`;
+export const configDir = `${buildDir}/config`;
 const buildBinariesDir = `${buildDir}/node_modules/.bin`;
 
 export const srcDir = `${rootDir}/src`;
@@ -18,7 +19,8 @@ export const bundleDir = `${generatedDir}/bundle`;
 export const bundleFile = `${bundleDir}/bundle.js`;
 
 export const buildScript = `${rootDir}/build.sh`;
-export const typescriptCompiler = `${buildBinariesDir}/tsc`;
+export const tsc = `${buildBinariesDir}/tsc`;
+export const swc = `${buildBinariesDir}/swc`;
 export const bundler = `${buildBinariesDir}/rollup`;
 export const httpServer = `${buildBinariesDir}/http-server`;
 
