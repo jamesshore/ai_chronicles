@@ -9,7 +9,7 @@ const statAsync = promisify(fs.stat);
 const writeFileAsync = promisify(fs.writeFile);
 const mkdirAsync = promisify(fs.mkdir);
 
-export default class Build {
+export class Build {
 
 	constructor({ incrementalDir }) {
 		this._taskFns = {};
@@ -48,6 +48,8 @@ export default class Build {
 	}
 
 	task(name, fn) {
+		if (typeof fn !== "function") throw new Error(`Task '${name}' expected function, but got: ${fn}`);
+
 		if (this._taskFns[name] === undefined) this._taskFns[name] = fn;
 		else throw new Error(`Task already defined: ${name}`);
 	}

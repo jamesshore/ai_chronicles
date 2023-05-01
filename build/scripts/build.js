@@ -1,6 +1,6 @@
 // Copyright Titanium I.T. LLC.
 
-import Build from "../util/build_runner.js";
+import { Build } from "../util/build_runner.js";
 import DependencyAnalysis from "../util/dependency_analysis.js";
 import * as pathLib from "node:path";
 import * as paths from "../config/paths.js";
@@ -17,6 +17,7 @@ shell.config.fatal = true;
 
 const successColor = Colors.brightGreen;
 const failureColor = Colors.brightRed;
+const timingColor = Colors.brightBlack;
 
 const rootDir = pathToFile(import.meta.url, "../..");
 
@@ -43,13 +44,13 @@ build.task("quick", async () => {
 });
 
 build.task("clean", () => {
-	console.log("Deleting generated files: .");
+	process.stdout.write("Deleting generated files: ");
 	shell.rm("-rf", `${paths.generatedDir}/*`);
+	process.stdout.write(".\n");
 });
 
-build.task("lint", async () => {
+build.task("lint", time(async () => {
 	let header = "Linting JavaScript: ";
-	let footer = "";
 
 	const lintPromises = paths.lintFiles().map(async (lintFile) => {
 		const lintDependency = lintDependencyName(lintFile);
@@ -58,7 +59,6 @@ build.task("lint", async () => {
 
 		process.stdout.write(header);
 		header = "";
-		footer = "\n";
 		const success = await lint.validateFileAsync(lintFile, lintConfig);
 		if (success) build.writeDirAndFileAsync(lintDependency, "lint ok");
 
@@ -68,11 +68,9 @@ build.task("lint", async () => {
 	const successes = await Promise.all(lintPromises);
 	const overallSuccess = successes.every((success) => success === true);
 	if (!overallSuccess) throw new Error("Lint failed");
+}));
 
-	process.stdout.write(footer);
-});
-
-build.incrementalTask("test", paths.testDependencies(), async () => {
+build.incrementalTask("test", paths.testDependencies(), time(async () => {
 	await build.runTasksAsync([ "compile" ]);
 
 	process.stdout.write("Testing JavaScript: ");
@@ -80,9 +78,9 @@ build.incrementalTask("test", paths.testDependencies(), async () => {
 		files: paths.testFiles(),
 		options: mochaConfig,
 	});
-});
+}));
 
-build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
+build.incrementalTask("bundle", paths.compilerDependencies(), time(async () => {
 	await build.runTasksAsync([ "compile" ]);
 	process.stdout.write("Bundling JavaScript: ");
 
@@ -95,7 +93,6 @@ build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
 
 	process.stdout.write(".");
 	copyFrontEndFiles();
-	process.stdout.write("\n");
 
 	function copyFrontEndFiles() {
 		paths.frontEndStaticFiles().forEach(file => {
@@ -106,9 +103,9 @@ build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
 			process.stdout.write(".");
 		});
 	}
-});
+}));
 
-build.incrementalTask("compile", paths.compilerDependencies(), async () => {
+build.incrementalTask("compile", paths.compilerDependencies(), time(async () => {
 	process.stdout.write("Compiling JavaScript: ");
 
 	const { code } = await sh.runInteractiveAsync(paths.swc, [
@@ -119,17 +116,17 @@ build.incrementalTask("compile", paths.compilerDependencies(), async () => {
 	]);
 	if (code !== 0) throw new Error("Compile failed");
 
-	process.stdout.write(".\n");
-});
+	process.stdout.write(".");
+}));
 
-build.incrementalTask("typecheck", paths.compilerDependencies(), async () => {
+build.incrementalTask("typecheck", paths.compilerDependencies(), time(async () => {
 	process.stdout.write("Type-checking JavaScript: ");
 
 	const { code } = await sh.runInteractiveAsync(paths.tsc, []);
 	if (code !== 0) throw new Error("Type check failed");
 
-	process.stdout.write(".\n");
-});
+	process.stdout.write(".");
+}));
 
 
 function lintDependencyName(filename) {
@@ -138,4 +135,14 @@ function lintDependencyName(filename) {
 
 function dependencyName(filename, extension) {
 	return `${paths.incrementalDir}/files/${build.rootRelativePath(rootDir, filename)}.${extension}`;
+}
+
+function time(fnAsync) {
+	return async () => {
+		const start = Date.now();
+		const result = await fnAsync();
+		const elapsedInSec = (Date.now() - start) / 1000;
+		process.stdout.write(timingColor(` (${elapsedInSec.toFixed(2)}s)\n`));
+		return result;
+	};
 }
