@@ -1,6 +1,6 @@
 // Copyright Titanium I.T. LLC.
 
-import { Build } from "../util/build_runner.js";
+import Build from "../util/build_runner.js";
 import DependencyAnalysis from "../util/dependency_analysis.js";
 import * as pathLib from "node:path";
 import * as paths from "../config/paths.js";
@@ -17,7 +17,6 @@ shell.config.fatal = true;
 
 const successColor = Colors.brightGreen;
 const failureColor = Colors.brightRed;
-const timingColor = Colors.brightBlack;
 
 const rootDir = pathToFile(import.meta.url, "../..");
 
@@ -44,13 +43,13 @@ build.task("quick", async () => {
 });
 
 build.task("clean", () => {
-	process.stdout.write("Deleting generated files: ");
+	console.log("Deleting generated files: .");
 	shell.rm("-rf", `${paths.generatedDir}/*`);
-	process.stdout.write(".\n");
 });
 
-build.task("lint", time(async () => {
+build.task("lint", async () => {
 	let header = "Linting JavaScript: ";
+	let footer = "";
 
 	const lintPromises = paths.lintFiles().map(async (lintFile) => {
 		const lintDependency = lintDependencyName(lintFile);
@@ -59,6 +58,7 @@ build.task("lint", time(async () => {
 
 		process.stdout.write(header);
 		header = "";
+		footer = "\n";
 		const success = await lint.validateFileAsync(lintFile, lintConfig);
 		if (success) build.writeDirAndFileAsync(lintDependency, "lint ok");
 
@@ -68,9 +68,11 @@ build.task("lint", time(async () => {
 	const successes = await Promise.all(lintPromises);
 	const overallSuccess = successes.every((success) => success === true);
 	if (!overallSuccess) throw new Error("Lint failed");
-}));
 
-build.incrementalTask("test", paths.testDependencies(), time(async () => {
+	process.stdout.write(footer);
+});
+
+build.incrementalTask("test", paths.testDependencies(), async () => {
 	await build.runTasksAsync([ "compile" ]);
 
 	process.stdout.write("Testing JavaScript: ");
@@ -78,9 +80,9 @@ build.incrementalTask("test", paths.testDependencies(), time(async () => {
 		files: paths.testFiles(),
 		options: mochaConfig,
 	});
-}));
+});
 
-build.incrementalTask("bundle", paths.compilerDependencies(), time(async () => {
+build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
 	await build.runTasksAsync([ "compile" ]);
 	process.stdout.write("Bundling JavaScript: ");
 
@@ -93,6 +95,7 @@ build.incrementalTask("bundle", paths.compilerDependencies(), time(async () => {
 
 	process.stdout.write(".");
 	copyFrontEndFiles();
+	process.stdout.write("\n");
 
 	function copyFrontEndFiles() {
 		paths.frontEndStaticFiles().forEach(file => {
@@ -103,9 +106,9 @@ build.incrementalTask("bundle", paths.compilerDependencies(), time(async () => {
 			process.stdout.write(".");
 		});
 	}
-}));
+});
 
-build.incrementalTask("compile", paths.compilerDependencies(), time(async () => {
+build.incrementalTask("compile", paths.compilerDependencies(), async () => {
 	process.stdout.write("Compiling JavaScript: ");
 
 	const { code } = await sh.runInteractiveAsync(paths.swc, [
@@ -116,17 +119,17 @@ build.incrementalTask("compile", paths.compilerDependencies(), time(async () => 
 	]);
 	if (code !== 0) throw new Error("Compile failed");
 
-	process.stdout.write(".");
-}));
+	process.stdout.write(".\n");
+});
 
-build.incrementalTask("typecheck", paths.compilerDependencies(), time(async () => {
+build.incrementalTask("typecheck", paths.compilerDependencies(), async () => {
 	process.stdout.write("Type-checking JavaScript: ");
 
 	const { code } = await sh.runInteractiveAsync(paths.tsc, []);
 	if (code !== 0) throw new Error("Type check failed");
 
-	process.stdout.write(".");
-}));
+	process.stdout.write(".\n");
+});
 
 
 function lintDependencyName(filename) {
@@ -135,14 +138,4 @@ function lintDependencyName(filename) {
 
 function dependencyName(filename, extension) {
 	return `${paths.incrementalDir}/files/${build.rootRelativePath(rootDir, filename)}.${extension}`;
-}
-
-function time(fnAsync) {
-	return async () => {
-		const start = Date.now();
-		const result = await fnAsync();
-		const elapsedInSec = (Date.now() - start) / 1000;
-		process.stdout.write(timingColor(` (${elapsedInSec.toFixed(2)}s)\n`));
-		return result;
-	};
 }
