@@ -1,7 +1,6 @@
-# Build artifacts
-/generated/
-/build/node_modules/
-/src/front_end/node_modules/
+# Build artifacts (use general directory names, not hard-coded paths)
+generated/
+node_modules/
 
 # MacOS
 .DS_Store
