@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>dev.ted.stream</groupId>
-	<artifactId>ai_chronicles</artifactId>
+	<artifactId>back_end</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>back_end</name>
-	<description>Back-end for the AI Chronicles</description>
+	<description>Back-end for AI Chronicles</description>
 	<properties>
 		<java.version>19</java.version>
 		<spring-cloud.version>2022.0.2</spring-cloud.version>
