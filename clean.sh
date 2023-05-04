@@ -1,4 +1,4 @@
 #!/bin/sh
 
-. build/scripts/prebuild.sh
-node build/scripts/run_build.js clean
+. _build/scripts/prebuild.sh
+node _build/scripts/run_build.js clean

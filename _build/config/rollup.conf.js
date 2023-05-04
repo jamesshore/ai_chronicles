@@ -6,7 +6,7 @@ import commonJs from "@rollup/plugin-commonjs";
 // Rollup is our code bundler. Documentation at https://rollupjs.org/configuration-options/
 
 export default {
-	input: `${paths.typescriptDir}/src/front_end/index.js`,
+	input: paths.bundleSrc,
 	output: {
 		file: paths.bundleFile,
 		format: "iife",

@@ -1,5 +1,5 @@
 #!/bin/sh
 
-. build/scripts/prebuild.sh
+. _build/scripts/prebuild.sh
 
-node build/scripts/integrate.js "$@"
+node _build/scripts/integrate.js "$@"

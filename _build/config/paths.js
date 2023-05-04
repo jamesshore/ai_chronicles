@@ -4,17 +4,17 @@ import { pathToFile } from "../util/module_paths.js";
 
 export const rootDir = pathToFile(import.meta.url, "../..");
 
-export const buildDir = `${rootDir}/build`;
+export const buildDir = `${rootDir}/_build`;
 export const configDir = `${buildDir}/config`;
 const buildBinariesDir = `${buildDir}/node_modules/.bin`;
 
-export const srcDir = `${rootDir}/src`;
-export const frontEndDir = `${srcDir}/front_end`;
-export const backEndDir = `${srcDir}/back_end`;
+export const frontEndDir = `${rootDir}/front_end`;
+export const backEndDir = `${rootDir}/back_end`;
 
 export const generatedDir = `${rootDir}/generated`;
 export const incrementalDir = `${generatedDir}/incremental-build`;
 export const typescriptDir = `${generatedDir}/compiled-typescript`;
+export const bundleSrc = `${typescriptDir}/front_end/index.js`;
 export const bundleDir = `${generatedDir}/bundle`;
 export const bundleFile = `${bundleDir}/bundle.js`;
 
@@ -26,7 +26,8 @@ export const httpServer = `${buildBinariesDir}/http-server`;
 
 export const watchFiles = memoizedDeglob([
 	`${buildDir}/**/*`,
-	`${srcDir}/**/*`,
+	`${frontEndDir}/**/*`,
+	`${backEndDir}/**/*`,
 ]);
 
 export const watchRestartFiles = memoizedDeglob([

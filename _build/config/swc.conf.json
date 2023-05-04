@@ -12,7 +12,7 @@
         "runtime": "automatic"
       }
     },
-    "baseUrl": "src/front_end",
+    "baseUrl": "front_end",
     "target": "es5",
     "loose": false,
     "externalHelpers": false,
