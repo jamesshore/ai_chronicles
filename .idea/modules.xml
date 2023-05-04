@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/ai_chronicles.iml" filepath="$PROJECT_DIR$/.idea/ai_chronicles.iml" />
       <module fileurl="file://$PROJECT_DIR$/back_end/back_end.iml" filepath="$PROJECT_DIR$/back_end/back_end.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/chat-rpg.iml" filepath="$PROJECT_DIR$/.idea/chat-rpg.iml" />
       <module fileurl="file://$PROJECT_DIR$/front_end/front_end.iml" filepath="$PROJECT_DIR$/front_end/front_end.iml" />
     </modules>
   </component>
