@@ -27,7 +27,7 @@ export const httpServer = `${buildBinariesDir}/http-server`;
 export const watchFiles = memoizedDeglob([
 	`${buildDir}/**/*`,
 	`${frontEndDir}/**/*`,
-	`${backEndDir}/**/*`,
+	// `${backEndDir}/**/*`,
 ]);
 
 export const watchRestartFiles = memoizedDeglob([
