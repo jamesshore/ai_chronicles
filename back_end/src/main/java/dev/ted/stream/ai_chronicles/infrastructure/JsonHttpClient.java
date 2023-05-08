@@ -2,6 +2,8 @@ package dev.ted.stream.ai_chronicles.infrastructure;
 
 import dev.ted.stream.ai_chronicles.OutputListener;
 import dev.ted.stream.ai_chronicles.OutputTracker;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -43,9 +45,7 @@ public class JsonHttpClient {
 
     public void post(String url, Object body) {
         listener.emit(JsonHttpRequest.createPost(url, body));
-        restTemplateWrapper.postForEntity(url,
-                                          body,
-                                          Void.class);
+        restTemplateWrapper.exchange(url, HttpMethod.POST, new HttpEntity<>(body), Void.class);
     }
 
     public OutputTracker<JsonHttpRequest> trackRequests() {
@@ -62,7 +62,7 @@ public class JsonHttpClient {
     interface RestTemplateWrapper {
         <T> ResponseEntityWrapper<T> getForEntity(String url, Class<T> responseType, Object... uriVariables);
 
-        <T> void postForEntity(String url, Object request, Class<T> responseType);
+        <T> ResponseEntityWrapper<T> exchange(String url, HttpMethod method, HttpEntity<Object> request, Class<T> responseType);
     }
 
     interface ResponseEntityWrapper<T> {
@@ -82,8 +82,10 @@ public class JsonHttpClient {
         }
 
         @Override
-        public <T> void postForEntity(String url, Object request, Class<T> responseType) {
-            restTemplate.postForEntity(url, request, responseType);
+        public <T> ResponseEntityWrapper<T> exchange(String url, HttpMethod method, HttpEntity<Object> request, Class<T> responseType) {
+            ResponseEntity<T> responseEntity = restTemplate.exchange(url,
+                    method, request, responseType);
+            return new RealResponseEntity<>(responseEntity);
         }
     }
 
@@ -133,8 +135,9 @@ public class JsonHttpClient {
         }
 
         @Override
-        public <T> void postForEntity(String url, Object request, Class<T> responseType) {
+        public <T> ResponseEntityWrapper<T> exchange(String url, HttpMethod method, HttpEntity<Object> request, Class<T> responseType) {
             // no-op
+            return null;
         }
 
         private <T> T nextResponse(String interpolatedUrl) {
