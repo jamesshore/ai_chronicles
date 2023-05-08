@@ -3,8 +3,12 @@ package dev.ted.stream.ai_chronicles.infrastructure;
 import dev.ted.stream.ai_chronicles.OutputListener;
 import dev.ted.stream.ai_chronicles.OutputTracker;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -38,14 +42,21 @@ public class JsonHttpClient {
         listener.emit(JsonHttpRequest.createGet(
                 interpolateUrl(urlTemplate, urlVariables)));
         return restTemplateWrapper.getForEntity(urlTemplate,
-                                                convertedResponseType,
-                                                (Object[]) urlVariables)
-                                  .getBody();
+                        convertedResponseType,
+                        (Object[]) urlVariables)
+                .getBody();
     }
 
-    public void post(String url, Object body) {
+    public void post(String url, Map<String, String> headers, Object body) {
         listener.emit(JsonHttpRequest.createPost(url, body));
-        restTemplateWrapper.exchange(url, HttpMethod.POST, new HttpEntity<>(body), Void.class);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        headers.forEach(httpHeaders::add);
+        restTemplateWrapper.exchange(
+                url,
+                HttpMethod.POST,
+                new HttpEntity<>(body, httpHeaders),
+                Void.class
+        );
     }
 
     public OutputTracker<JsonHttpRequest> trackRequests() {
@@ -149,7 +160,7 @@ public class JsonHttpClient {
             Iterator<T> response = (Iterator<T>) endpointsResponses.get(interpolatedUrl);
             if (!response.hasNext()) {
                 throw new NoSuchElementException("No more responses configured for URL: "
-                                                         + interpolatedUrl);
+                        + interpolatedUrl);
             }
             return response.next();
         }

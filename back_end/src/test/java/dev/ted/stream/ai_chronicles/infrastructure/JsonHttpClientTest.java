@@ -3,6 +3,7 @@ package dev.ted.stream.ai_chronicles.infrastructure;
 import dev.ted.stream.ai_chronicles.OutputTracker;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -109,6 +110,25 @@ class JsonHttpClientTest {
                 .isEqualTo("configured 2");
     }
 
+    @Test
+    void requestsAreTracked() {
+        JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(
+                Map.of("/get-endpoint?a", new ExampleDto())
+        );
+
+        OutputTracker<JsonHttpRequest> tracker = jsonHttpClient.trackRequests();
+
+        jsonHttpClient.get("/get-endpoint?{parm}", ExampleDto.class, "a");
+
+        ExampleDto postedBody = new ExampleDto("post");
+        jsonHttpClient.post("/post-endpoint", Collections.emptyMap(), postedBody);
+
+        assertThat(tracker.output())
+                .containsExactly(
+                        JsonHttpRequest.createGet("/get-endpoint?a"),
+                        JsonHttpRequest.createPost("/post-endpoint", postedBody));
+    }
+
 
     public static class ExampleDto {
         private String content;
@@ -129,25 +149,5 @@ class JsonHttpClientTest {
             this.content = content;
         }
     }
-
-    @Test
-    void requestsAreTracked() {
-        JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(
-                Map.of("/get-endpoint?a", new ExampleDto())
-        );
-
-        OutputTracker<JsonHttpRequest> tracker = jsonHttpClient.trackRequests();
-
-        jsonHttpClient.get("/get-endpoint?{parm}", ExampleDto.class, "a");
-
-        ExampleDto postedBody = new ExampleDto("post");
-        jsonHttpClient.post("/post-endpoint", postedBody);
-
-        assertThat(tracker.output())
-                .containsExactly(
-                        JsonHttpRequest.createGet("/get-endpoint?a"),
-                        JsonHttpRequest.createPost("/post-endpoint", postedBody));
-    }
-
 
 }
