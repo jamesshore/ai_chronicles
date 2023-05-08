@@ -6,9 +6,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -48,7 +45,7 @@ public class JsonHttpClient {
     }
 
     public void post(String url, Map<String, String> headers, Object body) {
-        listener.emit(JsonHttpRequest.createPost(url, body));
+        listener.emit(JsonHttpRequest.createPost(url, headers, body));
         HttpHeaders httpHeaders = new HttpHeaders();
         headers.forEach(httpHeaders::add);
         restTemplateWrapper.exchange(

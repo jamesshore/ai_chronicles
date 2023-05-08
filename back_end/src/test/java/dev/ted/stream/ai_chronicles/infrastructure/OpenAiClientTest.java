@@ -3,6 +3,8 @@ package dev.ted.stream.ai_chronicles.infrastructure;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+
 import static org.assertj.core.api.Assertions.*;
 
 
@@ -20,7 +22,7 @@ class OpenAiClientTest {
         openAi.prompt("my_prompt");
 
         assertThat(httpRequests.output())
-                .containsExactly(JsonHttpRequest.createPost("https://api.openai.com/v1/chat/completions", new Object()));
+                .containsExactly(JsonHttpRequest.createPost("https://api.openai.com/v1/chat/completions", Collections.emptyMap(), new Object()));
 
 
 

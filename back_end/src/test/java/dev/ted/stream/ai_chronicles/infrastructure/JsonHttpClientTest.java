@@ -120,13 +120,14 @@ class JsonHttpClientTest {
 
         jsonHttpClient.get("/get-endpoint?{parm}", ExampleDto.class, "a");
 
+        Map<String, String> headers = Map.of("header1", "value1", "header2", "value2");
         ExampleDto postedBody = new ExampleDto("post");
-        jsonHttpClient.post("/post-endpoint", Collections.emptyMap(), postedBody);
+        jsonHttpClient.post("/post-endpoint", headers, postedBody);
 
         assertThat(tracker.output())
                 .containsExactly(
                         JsonHttpRequest.createGet("/get-endpoint?a"),
-                        JsonHttpRequest.createPost("/post-endpoint", postedBody));
+                        JsonHttpRequest.createPost("/post-endpoint", headers, postedBody));
     }
 
 
