@@ -8,13 +8,13 @@ describe("Colors", () => {
 	const { red } = colors;    // see production code for other supported colors
 
 	it("color-codes text", () => {
-		assert.equal(red("text"), "\u001b[31mtext\u001b[0m");
+		expect(red("text")).toBe("\u001b[31mtext\u001b[0mx");
 	});
 
 	it("has styling", () => {
 		// note that support for styles depends on terminal emulator
 
-		assert.equal(red.bold("text"), "\u001b[1;31mtext\u001b[0m", "bold");
+		expect(red.bold("text")).toBe("\u001b[1;31mtext\u001b[0mX");
 		assert.equal(red.dim("text"), "\u001b[2;31mtext\u001b[0m", "dim");
 		assert.equal(red.underline("text"), "\u001b[4;31mtext\u001b[0m", "underline");
 		assert.equal(red.blink("text"), "\u001b[5;31mtext\u001b[0m", "blink");
