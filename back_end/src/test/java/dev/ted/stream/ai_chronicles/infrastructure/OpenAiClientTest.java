@@ -1,18 +1,17 @@
 package dev.ted.stream.ai_chronicles.infrastructure;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 class OpenAiClientTest {
     // Test 0:
     // Manually figure out what the request and responses actually are
 
-    @Disabled
     @Test
     void sendsPromptToOpenAi() {
         JsonHttpClient httpClient = JsonHttpClient.createNull();
@@ -21,8 +20,18 @@ class OpenAiClientTest {
         OpenAiClient openAi = new OpenAiClient(httpClient, "my_api_key");
         openAi.prompt("my_prompt");
 
-        assertThat(httpRequests.output())
-                .containsExactly(JsonHttpRequest.createPost("https://api.openai.com/v1/chat/completions", Collections.emptyMap(), new Object()));
+        JsonHttpRequest expectedRequest = JsonHttpRequest.createPost(
+                "https://api.openai.com/v1/chat/completions",
+                Map.of(
+                        "Authorization", "Bearer my_api_key",
+                        "Content-Type", "application/json"
+                ),
+                new PromptBody("gpt-3.5-turbo",
+                        List.of(new PromptBody.Message("user", "my_prompt")),
+                        0.7
+                )
+        );
+        assertThat(httpRequests.output()).containsExactly(expectedRequest);
 
 
 
