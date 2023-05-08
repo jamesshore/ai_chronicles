@@ -6,6 +6,7 @@ node_modules/
 .DS_Store
 
 # JetBrains IDEs
-/.idea/workspace.xml
-/.idea/shelf/
-/.idea/usage.statistics.xml
+.idea/workspace.xml
+.idea/shelf/
+.idea/usage.statistics.xml
+.idea/httpRequests/
