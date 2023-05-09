@@ -1,6 +1,6 @@
 // Copyright Titanium I.T. LLC.
 
-import assert from "./assert.js";
+import { strict as assert } from 'node:assert';
 import { describe, it } from "node:test";
 import colors from "./colors.js";
 
@@ -30,8 +30,8 @@ describe("Colors", () => {
 		assert.equal(red.bold.underline("text"), "\u001b[1;4;31mtext\u001b[0m", "multiple styles");
 		assert.equal(red.underline.bold("text"), "\u001b[4;1;31mtext\u001b[0m", "use any order");
 
-		assert.isUndefined(red.bold.bold, "doesn't repeat styles");
-		assert.isUndefined(red.bold.underline.bold, "doesn't repeat styles even recursively");
+		assert.equal(red.bold.bold, undefined, "doesn't repeat styles");
+		assert.equal(red.bold.underline.bold, undefined, "doesn't repeat styles even recursively");
 	});
 
 });
