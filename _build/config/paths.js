@@ -30,6 +30,8 @@ export const watchFiles = memoizedDeglob([
 	`${buildDir}/**/*`,
 	`${frontEndSrcDir}/**/*`,
 	// `${backEndDir}/**/*`,
+], [
+	`${buildDir}/node_modules/**/*`,
 ]);
 
 export const watchRestartFiles = memoizedDeglob([
