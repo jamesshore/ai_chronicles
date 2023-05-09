@@ -86,7 +86,7 @@ build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
 	await build.runTasksAsync([ "compile" ]);
 	process.stdout.write("Bundling JavaScript: ");
 
-	const { code } = await sh.runInteractiveAsync(paths.bundler, [
+	const { code } = await sh.runInteractiveAsync(paths.rollup, [
 		"--failAfterWarnings",
 		"--silent",
 		"--config", `${paths.configDir}/rollup.conf.js`,
@@ -99,7 +99,7 @@ build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
 
 	function copyFrontEndFiles() {
 		paths.frontEndStaticFiles().forEach(file => {
-			const relativePath = build.rootRelativePath(paths.frontEndDir, file);
+			const relativePath = build.rootRelativePath(paths.frontEndSrcDir, file);
 			const destFile = `${paths.bundleDir}/${relativePath}`;
 			shell.mkdir("-p", pathLib.dirname(destFile));
 			shell.cp(file, destFile);
@@ -115,7 +115,7 @@ build.incrementalTask("compile", paths.compilerDependencies(), async () => {
 		"--config-file", `${paths.configDir}/swc.conf.json`,
 		"--out-dir", paths.typescriptDir,
 		"--quiet",
-		paths.frontEndDir
+		paths.frontEndSrcDir
 	]);
 	if (code !== 0) throw new Error("Compile failed");
 
