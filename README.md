@@ -54,4 +54,7 @@ Non-goals:
 
 ## Engineering Tasks
 
-* (tbd)
+* ➡️ OpenAI Wrapper that talks to real Open AI
+* Nullable OpenAI Wrapper
+* Reuse HttpClient wrapper that communicates via HTTP(S)
+* Manual test of communication
