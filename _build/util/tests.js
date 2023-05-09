@@ -1,2 +1,5 @@
 export * as assert from "./assert.js";
-export { describe, it } from "node:test";
+
+// Globals created by Mocha
+export const describe = global.describe;
+export const it = global.it;
