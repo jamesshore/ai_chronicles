@@ -1,6 +1,6 @@
 // Copyright (c) 2013-2017 Titanium I.T. LLC. All rights reserved. See LICENSE.TXT for details.
 
-import Colors from "./colors.js";
+import Colors from "../util/colors.js";
 import { readFileSync } from "node:fs";
 import * as paths from "../config/paths.js";
 

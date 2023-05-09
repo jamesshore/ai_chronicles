@@ -1,13 +1,13 @@
 // Copyright Titanium I.T. LLC.
 
-import Build from "../util/build_runner.js";
+import Build from "../util/build_lib.js";
 import DependencyAnalysis from "../util/dependency_analysis.js";
 import * as pathLib from "node:path";
 import * as paths from "../config/paths.js";
-import * as lint from "../util/lint_runner.js";
+import * as lint from "../runners/lint_runner.js";
 import lintConfig from "../config/eslint.conf.js";
 import shell from "shelljs";
-import { runMochaAsync } from "../util/mocha_runner.js";
+import { runMochaAsync } from "../runners/mocha_runner.js";
 import mochaConfig from "../config/mocha.conf.js";
 import Colors from "../util/colors.js";
 import { pathToFile } from "../util/module_paths.js";

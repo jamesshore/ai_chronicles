@@ -1,6 +1,6 @@
 // Copyright Titanium I.T. LLC.
 
-import { checkNodeVersion } from "../util/node_version_checker.js";
+import { checkNodeVersion } from "../runners/node_version_checker.js";
 import { runBuildAsync } from "./build.js";
 
 checkNodeVersion();
