@@ -60,8 +60,8 @@ export const compilerDependencies = memoizedDeglob([
 ]);
 
 export const testFiles = memoizedDeglob([
-	`${buildDir}/**/_*_test.js`,
-	`${generatedDir}/typescript/**/_*_test.js`,
+	`${buildDir}/**/*.test.js`,
+	`${generatedDir}/typescript/**/*.test.js`,
 ]);
 
 export const testDependencies = memoizedDeglob([
