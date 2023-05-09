@@ -10,10 +10,24 @@ describe("Hello", () => {
     cleanup();
   });
 
-  it("checks rendering", () => {
+  it("renders", () => {
     const { getByRole } = render(<Hello name={"my_name"}/>);
     const header = getByRole("heading");
     assert.match(header.innerHTML, /my_name/);
+  });
+
+  it("responds to button clicks", async () => {
+    let called = false;
+    const fn = () => {
+      called = true;
+    };
+
+    const user = userEvent.setup({ document });
+    const { getByRole } = render(<Hello onClick={fn} />);
+    const button = getByRole("button");
+    await user.click(button);
+
+    assert.equal(called, true);
   });
 
 });
