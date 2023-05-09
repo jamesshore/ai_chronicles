@@ -2,6 +2,7 @@
 
 import assert from "./assert.js";
 import colors from "./colors.js";
+import { describe, it, expect } from 'vitest'
 
 describe("Colors", () => {
 
