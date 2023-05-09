@@ -1,5 +1,5 @@
 // Copyright Titanium I.T. LLC.
-import assert from "./assert.js";
+import * as assert from "./assert.js";
 
 describe("Assert", () => {
 
@@ -26,14 +26,14 @@ describe("Assert", () => {
 
 		it("passes if actual doesn't include string", function() {
 			expectPass(() => {
-				assert.notIncludes("abcdef", "xxx");
+				assert.doesNotInclude("abcdef", "xxx");
 			});
 		});
 
 
 		it("fails if actual does include string", function() {
 			expectFail(() => {
-				assert.notIncludes("abcdef", "bcd");
+				assert.doesNotInclude("abcdef", "bcd");
 			}, "'abcdef' should not include 'bcd'", "abcdef", "bcd");
 		});
 

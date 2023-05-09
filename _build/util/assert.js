@@ -6,26 +6,31 @@
 import { assert as chai } from "chai";
 
 const exports = chai;
-export default exports;
 
 // By default, Chai's assert.equal does type conversions. DO. NOT. WANT.
-exports.equal = chai.strictEqual;
+export const equal = chai.strictEqual;
 
-exports.includes = function(actual, expected, message) {
+export const deepEqual = chai.deepEqual;
+
+export const isUndefined = chai.isUndefined;
+
+export const isNotUndefined = chai.isNotUndefined;
+
+export function includes(actual, expected, message) {
 	checkExpected(expected);
 	if (!actual.includes(expected)) {
 		fail(message, `'${actual}' should include '${expected}'`);
 	}
-};
+}
 
-exports.notIncludes = function(actual, expected, message) {
+export function doesNotInclude(actual, expected, message) {
 	checkExpected(expected);
 	if (actual.includes(expected)) {
 		fail(message, `'${actual}' should not include '${expected}'`);
 	}
-};
+}
 
-exports.throwsAsync = async function(fnAsync, expectedRegexOrExactString, message) {
+export async function throwsAsync(fnAsync, expectedRegexOrExactString, message) {
 	try {
 		await fnAsync();
 	}
@@ -40,21 +45,21 @@ exports.throwsAsync = async function(fnAsync, expectedRegexOrExactString, messag
 		return;
 	}
 	fail(message, "Expected exception");
-};
+}
 
-exports.doesNotThrowAsync = async function(fnAsync) {
+export async function doesNotThrowAsync(fnAsync) {
 	await fnAsync();
-};
+}
 
-exports.promiseResolvesAsync = async function(promise, message) {
+export async function promiseResolvesAsync(promise, message) {
 	const promiseResolves = await doesPromiseResolve(promise);
 	if (!promiseResolves) fail(message, "Expected promise to resolve, but it didn't");
-};
+}
 
-exports.promiseDoesNotResolveAsync = async function(promise, message) {
+export async function promiseDoesNotResolveAsync(promise, message) {
 	const promiseResolves = await doesPromiseResolve(promise);
 	if (promiseResolves) fail(message, "Expected promise to not resolve, but it did");
-};
+}
 
 
 
