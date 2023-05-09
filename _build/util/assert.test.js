@@ -1,5 +1,6 @@
 // Copyright Titanium I.T. LLC.
 import assert from "./assert.js";
+import { describe, it } from "node:test";
 
 describe("Assert", () => {
 
