@@ -5,6 +5,8 @@
   "author": "James Shore <jshore@jamesshore.com> and Ted M. Young <ted@tedmyoung.com>",
   "license": "MIT",
   "dependencies": {
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.4.3",
     "@types/react-dom": "^18.2.1",
     "chai": "^4.3.7",
     "react": "^18.2.0",
