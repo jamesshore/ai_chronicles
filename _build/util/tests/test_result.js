@@ -262,5 +262,5 @@ function renderDiff(error) {
 
 	return "\n" +
 		expectedColor("expected: ") + expected.join("\n") + "\n" +
-		actualColor("actual::: ") + actual.join("\n") + "\n";
+		actualColor("actual:   ") + actual.join("\n") + "\n";
 }

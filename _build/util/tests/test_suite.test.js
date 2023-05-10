@@ -1,7 +1,6 @@
 // Copyright Titanium I.T. LLC.
-import { describe, it } from "../tests.js";
+import { test, assert } from "../tests.js";
 import * as testSuite from "./test_suite.js";
-import * as assert from "./assert.js";
 import { Clock } from "../infrastructure/clock.js";
 import { TestResult } from "./test_result.js";
 
@@ -11,9 +10,9 @@ const IRRELEVANT_NAME = "irrelevant name";
 const DEFAULT_TIMEOUT = testSuite.DEFAULT_TIMEOUT_IN_MS;
 const EXCEED_TIMEOUT = DEFAULT_TIMEOUT + 1;
 
-describe("Test Library", () => {
+export default test(({ describe }) => {
 
-	describe("test suite", () => {
+	describe("test suite", ({ it }) => {
 
 		it("executes immediately (but tests don't)", () => {
 			let suiteRan = false;
@@ -74,9 +73,10 @@ describe("Test Library", () => {
 			const suite2 = testSuite.test(({ it }) => {
 				it("test2", () => {});
 			});
-			const combinedSuite = testSuite.suite([ suite1, suite2 ]);
 
-			assert.objEqual(await combinedSuite.runAsync(),
+			const manualSuite = testSuite.suite([ suite1, suite2 ]);
+
+			assert.objEqual(await manualSuite.runAsync(),
 				TestResult.suite("", [
 					TestResult.suite("", [
 						TestResult.pass("test1"),
@@ -116,7 +116,7 @@ describe("Test Library", () => {
 	});
 
 
-	describe("test case", () => {
+	describe("test case", ({ it }) => {
 
 		it("runs when its parent suite is run", async () => {
 			let testRan = false;
@@ -178,7 +178,7 @@ describe("Test Library", () => {
 	});
 
 
-	describe("before/after", () => {
+	describe("before/after", ({ it }) => {
 
 		it("runs function before and after all tests in a suite", async () => {
 			const ordering = [];
@@ -418,7 +418,7 @@ describe("Test Library", () => {
 	});
 
 
-	describe("timeouts", () => {
+	describe("timeouts", ({ it }) => {
 
 		it("times out when test doesn't complete in expected amount of time", async () => {
 			const clock = Clock.createNull();
@@ -660,7 +660,7 @@ describe("Test Library", () => {
 	});
 
 
-	describe(".skip", () => {
+	describe(".skip", ({ it }) => {
 
 		it("skips tests that have no function", async () => {
 			const suite = testSuite.test(({ it }) => {
@@ -715,7 +715,7 @@ describe("Test Library", () => {
 	});
 
 
-	describe(".only", () => {
+	describe(".only", ({ it }) => {
 
 		it("if any tests are marked .only, it only runs those tests", async () => {
 			const suite = testSuite.test(({ it }) => {

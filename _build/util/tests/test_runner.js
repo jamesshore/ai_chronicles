@@ -18,7 +18,7 @@ export class TestRunner {
 			try {
 				const suite = (await import(filename)).default;
 				if (suite?.runAsync === undefined) {
-					return fail(path.basename(filename), `doesn't export a test suite: ${filename}`);
+					return fail(path.basename(filename), `doesn't export a test suite: ${filename}:1`);
 				}
 				else {
 					suite.filename = filename;

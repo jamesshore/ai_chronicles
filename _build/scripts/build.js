@@ -7,8 +7,7 @@ import * as paths from "../config/paths.js";
 import * as lint from "../runners/lint_runner.js";
 import lintConfig from "../config/eslint.conf.js";
 import shell from "shelljs";
-import { runMochaAsync } from "../runners/mocha_runner.js";
-import mochaConfig from "../config/mocha.conf.js";
+import { TestRunner } from "../util/tests/test_runner.js";
 import * as colors from "../util/colors.js";
 import { pathToFile } from "../util/module_paths.js";
 import * as sh from "../util/sh.js";
@@ -72,14 +71,67 @@ build.task("lint", async () => {
 	process.stdout.write(footer);
 });
 
+
+const failColor = colors.brightRed.dim;
+const timeoutColor = colors.purple.dim;
+const skipColor = colors.cyan.dim;
+const passColor = colors.green.dim;
+const summaryColor = colors.brightWhite.dim;
+
 build.incrementalTask("test", paths.testDependencies(), async () => {
 	await build.runTasksAsync([ "compile" ]);
 
 	process.stdout.write("Testing JavaScript: ");
-	await runMochaAsync({
-		files: paths.testFiles(),
-		options: mochaConfig,
-	});
+
+	const startTime = Date.now();
+	const testSummary = await TestRunner.create().testFilesAsync(paths.testFiles());
+	if (testSummary.total === 0) {
+		process.stdout.write("\n");
+		throw new Error("No tests found");
+	}
+
+	renderSummary({ startTime, ...testSummary });
+
+	await Promise.all(testSummary.successFiles.map(async (testFile) => {
+		await build.writeDirAndFileAsync(testDependencyName(testFile), "test ok");
+	}));
+
+	if (!testSummary.success) throw new Error("Tests failed");
+
+
+	function renderSummary({ startTime,
+													 total,
+													 pass = 0,
+													 fail = 0,
+													 timeout = 0,
+													 skip = 0
+												 }) {
+		const elapsedMs = Date.now() - startTime;
+		const msEach = (elapsedMs / (total - skip)).toFixed(1);
+		const elapsedRender = `(${(elapsedMs / 1000).toFixed(2)}s)`;
+		const countRender =
+			summaryColor(`(`) +
+			renderCount(fail, "failed", failColor) +
+			renderCount(timeout, "timed out", timeoutColor) +
+			renderCount(skip, "skipped", skipColor) +
+			renderCount(pass, "passed", passColor) +
+			summaryColor(`${msEach}ms avg.)`);
+		process.stdout.write(` ${elapsedRender}\n${countRender}\n`);
+
+		function renderCount(number, description, color) {
+			if (number === 0) {
+				return "";
+			}
+			else {
+				return color(`${number} ${description}; `);
+			}
+		}
+	}
+
+	function testDependencyName(filename) {
+		return dependencyName(filename, "test");
+	}
+
 });
 
 build.incrementalTask("bundle", paths.compilerDependencies(), async () => {

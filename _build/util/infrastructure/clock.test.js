@@ -1,10 +1,10 @@
 // Copyright Titanium I.T. LLC.
-import { describe, it, assert } from "../tests.js";
+import { test, assert } from "../tests.js";
 import { Clock } from "./clock.js";
 
-describe("Clock", () => {
+export default test(({ describe }) => {
 
-	describe("information", () => {
+	describe("information", ({ it }) => {
 
 		it("provides current timestamp", () => {
 			const clock = Clock.create();
@@ -37,7 +37,7 @@ describe("Clock", () => {
 	});
 
 
-	describe("wait", () => {
+	describe("wait", ({ it }) => {
 
 		it("waits N milliseconds", async () => {
 			const clock = Clock.create();
@@ -51,7 +51,7 @@ describe("Clock", () => {
 	});
 
 
-	describe("repeat", () => {
+	describe("repeat", ({ it }) => {
 
 		it("calls a function every N milliseconds", async () => {
 			const clock = Clock.create();
@@ -71,7 +71,7 @@ describe("Clock", () => {
 	});
 
 
-	describe("timeouts", () => {
+	describe("timeouts", ({ it }) => {
 
 		function createTimeoutFn(result = "default timeout function result") {
 			const timeoutFn = () => {
@@ -160,7 +160,7 @@ describe("Clock", () => {
 	});
 
 
-	describe("nullability", () => {
+	describe("nullability", ({ it }) => {
 
 		it("defaults 'now' to zero", () => {
 			const clock = Clock.createNull();

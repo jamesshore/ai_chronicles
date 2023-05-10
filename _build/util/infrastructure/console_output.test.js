@@ -1,11 +1,11 @@
 // Copyright Titanium I.T. LLC.
-import { assert, describe, it } from "../tests.js";
+import { test, assert } from "../tests.js";
 import childProcess from "node:child_process";
 import { ConsoleOutput } from "./console_output.js";
 import { pathToFile } from "../module_paths.js";
 /* dependency: ./console_output.test.helper.js */
 
-describe("ConsoleOutput", () => {
+export default test(({ it }) => {
 
 	it("real version writes to stdout (or stderr), null version doesn't", async () => {
 		const { stdout, stderr } = await runModuleAsync(

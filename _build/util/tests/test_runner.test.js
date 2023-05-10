@@ -1,5 +1,5 @@
 // Copyright Titanium I.T. LLC.
-import { describe, it, assert } from "../tests.js";
+import { test, assert } from "../tests.js";
 import * as testSuite from "./test_suite.js";
 import { TestRunner } from "./test_runner.js";
 import { ConsoleOutput } from "../infrastructure/console_output.js";
@@ -13,7 +13,7 @@ import PASS_MODULE from "./test_runner.test.success_helper.js";
 const IRRELEVANT_NAME = "irrelevant name";
 const PASS_PROGRESS = TestResult.pass("irrelevant name").renderProgress();
 
-describe("Test Runner", () => {
+export default test(({ it }) => {
 
 	it("renders progress", async () => {
 		const { runner, output } = createRunner();

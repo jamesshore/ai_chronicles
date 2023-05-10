@@ -1,9 +1,9 @@
 // Copyright Titanium I.T. LLC.
-import { assert, describe, it } from "../tests.js";
+import { test, assert } from "../tests.js";
 import { OutputTracker } from "./output_tracker.js";
 import EventEmitter from "node:events";
 
-describe("OutputTracker", () => {
+export default test(({ it }) => {
 
 	const EVENT = "my_event";
 

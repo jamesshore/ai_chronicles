@@ -1,9 +1,9 @@
 // Copyright Titanium I.T. LLC.
-import { describe, it, assert } from "../tests.js";
+import { test, assert } from "../tests.js";
 
-describe("Assert", () => {
+export default test(({ describe }) => {
 
-	describe("objEqual()", () => {
+	describe("objEqual()", ({ it }) => {
 
 		it("passes if expected.equals() returns true", () => {
 			const expected = { equals() { return true; }};
@@ -30,7 +30,7 @@ describe("Assert", () => {
 	});
 
 
-	describe("includes()", () => {
+	describe("includes()", ({ it }) => {
 
 		it("passes if actual includes string", () => {
 			expectPass(() => {
@@ -47,7 +47,7 @@ describe("Assert", () => {
 	});
 
 
-	describe("notIncludes()", () => {
+	describe("notIncludes()", ({ it }) => {
 
 		it("passes if actual doesn't include string", function() {
 			expectPass(() => {
@@ -65,7 +65,7 @@ describe("Assert", () => {
 	});
 
 
-	describe("throwsAsync()", () => {
+	describe("throwsAsync()", ({ it }) => {
 
 		it("passes if function throws and there's no expectation", async () => {
 			await expectPassAsync(async () => {
@@ -118,7 +118,7 @@ describe("Assert", () => {
 	});
 
 
-	describe("doesNotThrowAsync()", () => {
+	describe("doesNotThrowAsync()", ({ it }) => {
 
 		it("passes if function does not throw exception", async () => {
 			await expectPassAsync(async () => {

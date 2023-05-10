@@ -1,12 +1,12 @@
 // Copyright Titanium I.T. LLC.
-import { assert, describe, it } from "../tests.js";
+import { test, assert } from "../tests.js";
 import { TestResult } from "./test_result.js";
 import * as util from "node:util";
 import * as colors from "../colors.js";
 
-describe("Test Result", () => {
+export default test(({ describe }) => {
 
-	describe("test case", () => {
+	describe("test case", ({ it }) => {
 
 		it("passing tests have a name and status", () => {
 			const result = TestResult.pass("my name");
@@ -81,7 +81,7 @@ describe("Test Result", () => {
 	});
 
 
-	describe("test suite", () => {
+	describe("test suite", ({ it }) => {
 
 		it("has a name and list of test results", () => {
 			const list = [ createPass("test 1"), createPass("test 2") ];
@@ -160,7 +160,8 @@ describe("Test Result", () => {
 			assert.objEqual(failures[2], createFail({ name: "fail 2" }));
 		});
 
-		describe("summary", () => {
+
+		describe("summary", ({ it }) => {
 
 			it("provides test count", () => {
 				const suite = createSuite({ results: [
@@ -236,7 +237,7 @@ describe("Test Result", () => {
 	});
 
 
-	describe("progress rendering", () => {
+	describe("progress rendering", ({ it }) => {
 
 		it("renders progress marker", () => {
 			assert.equal(createPass().renderProgress(), colors.white("."), "pass");
@@ -248,7 +249,7 @@ describe("Test Result", () => {
 	});
 
 
-	describe("full rendering", () => {
+	describe("full rendering", ({ describe, it }) => {
 
 		it("'pass' renders name", () => {
 			const result = createPass({ name: "my name" });
@@ -277,7 +278,7 @@ describe("Test Result", () => {
 		});
 
 
-		describe("fail", () => {
+		describe("fail", ({ it }) => {
 
 			it("renders name, stack trace, and error message", () => {
 				const error = new Error("my error");
@@ -312,7 +313,7 @@ describe("Test Result", () => {
 					colors.brightWhite("\nmy name »\n") +
 					colors.brightRed("my error\n") +
 					"\n" + colors.green("expected: ") + util.inspect("my expected") + "\n" +
-					colors.brightRed("actual::: ") + util.inspect("my actual") + "\n"
+					colors.brightRed("actual:   ") + util.inspect("my actual") + "\n"
 				);
 			});
 
@@ -338,7 +339,7 @@ describe("Test Result", () => {
 					"  '1234567890\\n' +\n" +
 					"  '1234567890\\n' +\n" +
 					"  '1234567890\\n'\n" +
-					colors.brightRed("actual::: ") + "'1234567890\\n' +\n" +
+					colors.brightRed("actual:   ") + "'1234567890\\n' +\n" +
 					"  '1234567890\\n' +\n" +
 					colors.brightYellow.bold("  'XXXXXXXXXX\\n' +") + "\n" +
 					"  '1234567890\\n' +\n" +
@@ -366,7 +367,7 @@ describe("Test Result", () => {
 					colors.brightWhite("\nmy name »\n") +
 					colors.brightRed("my error\n") +
 					"\n" + colors.green("expected: ") + colors.brightYellow.bold("'1234567890123456789012345678901234567890\\n'") + "\n" +
-					colors.brightRed("actual::: ") + colors.brightYellow.bold("'1234567890123456789012345678901234567890\\n' +") + "\n" +
+					colors.brightRed("actual:   ") + colors.brightYellow.bold("'1234567890123456789012345678901234567890\\n' +") + "\n" +
 					colors.brightYellow.bold("  '1234567890123456789012345678901234567890\\n'") + "\n"
 				);
 			});
@@ -395,7 +396,7 @@ describe("Test Result", () => {
 					colors.brightYellow.bold("  '1234567890\\n' +") + "\n" +
 					colors.brightYellow.bold("  '1234567890\\n' +") + "\n" +
 					colors.brightYellow.bold("  '1234567890\\n'") + "\n" +
-					colors.brightRed("actual::: ") + colors.brightYellow.bold("'1234567890123456789012345678901234567890\\n' +") + "\n" +
+					colors.brightRed("actual:   ") + colors.brightYellow.bold("'1234567890123456789012345678901234567890\\n' +") + "\n" +
 					colors.brightYellow.bold("  '1234567890123456789012345678901234567890\\n'") + "\n"
 				);
 			});
