@@ -51,37 +51,6 @@ export async function doesNotThrowAsync(fnAsync) {
 	await fnAsync();
 }
 
-export async function promiseResolvesAsync(promise, message) {
-	const promiseResolves = await doesPromiseResolve(promise);
-	if (!promiseResolves) fail(message, "Expected promise to resolve, but it didn't");
-}
-
-export async function promiseDoesNotResolveAsync(promise, message) {
-	const promiseResolves = await doesPromiseResolve(promise);
-	if (promiseResolves) fail(message, "Expected promise to not resolve, but it did");
-}
-
-
-
-async function doesPromiseResolve(promise) {
-	let promiseResolved = false;
-	promise.then(() => {
-		promiseResolved = true;
-	});
-
-	await drainEventLoopAsync();
-	return promiseResolved;
-}
-
-async function drainEventLoopAsync() {
-	await new Promise((resolve, reject) => {
-		// We call setImmediate() twice because some callbacks are executed after setImmediate.
-		setImmediate(() => {
-			setImmediate(resolve);
-		});
-	});
-}
-
 function fail(userMessage, assertionMessage) {
 	userMessage = userMessage ? `${userMessage}: ` : "";
 	chai.fail(`${userMessage}${assertionMessage}`);

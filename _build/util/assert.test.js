@@ -108,44 +108,6 @@ describe("Assert", () => {
 
 	});
 
-
-	describe("promiseResolvesAsync()", () => {
-
-		it("passes if promise resolves", async () => {
-			await expectPassAsync(async () => {
-				const promise = new Promise((resolve) => setImmediate(resolve));
-				await assert.promiseResolvesAsync(promise);
-			});
-		});
-
-		it("fails if promise doesn't resolve", async () => {
-			await expectFailAsync(async () => {
-				const promise = new Promise(() => {});
-				await assert.promiseResolvesAsync(promise);
-			}, "Expected promise to resolve, but it didn't");
-		});
-
-	});
-
-
-	describe("promiseDoesNotResolveAsync()", () => {
-
-		it("passes if promise doesn't resolve", async () => {
-			await expectPassAsync(async () => {
-				const promise = new Promise(() => {});
-				await assert.promiseDoesNotResolveAsync(promise);
-			});
-		});
-
-		it("fails if promise does resolve", async () => {
-			await expectFailAsync(async () => {
-				const promise = new Promise((resolve) => setImmediate(resolve));
-				await assert.promiseDoesNotResolveAsync(promise);
-			}, "Expected promise to not resolve, but it did");
-		});
-
-	});
-
 });
 
 function expectPass(fn) {
