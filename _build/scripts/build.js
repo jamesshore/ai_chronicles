@@ -72,10 +72,10 @@ build.task("lint", async () => {
 });
 
 
-const failColor = colors.brightRed.dim;
-const timeoutColor = colors.purple.dim;
-const skipColor = colors.cyan.dim;
-const passColor = colors.green.dim;
+const failColor = colors.red;
+const timeoutColor = colors.purple;
+const skipColor = colors.cyan;
+const passColor = colors.green;
 const summaryColor = colors.brightWhite.dim;
 
 build.incrementalTask("test", paths.testDependencies(), async () => {
@@ -107,16 +107,16 @@ build.incrementalTask("test", paths.testDependencies(), async () => {
 													 skip = 0
 												 }) {
 		const elapsedMs = Date.now() - startTime;
+		const elapsedSec = (elapsedMs / 1000).toFixed(2);
 		const msEach = (elapsedMs / (total - skip)).toFixed(1);
-		const elapsedRender = `(${(elapsedMs / 1000).toFixed(2)}s)`;
-		const countRender =
-			summaryColor(`(`) +
+		const render =
+			summaryColor(`\n(`) +
 			renderCount(fail, "failed", failColor) +
 			renderCount(timeout, "timed out", timeoutColor) +
 			renderCount(skip, "skipped", skipColor) +
 			renderCount(pass, "passed", passColor) +
-			summaryColor(`${msEach}ms avg.)`);
-		process.stdout.write(` ${elapsedRender}\n${countRender}\n`);
+			summaryColor(`${msEach}ms avg., ${elapsedSec}s ttl.)\n`);
+		process.stdout.write(render);
 
 		function renderCount(number, description, color) {
 			if (number === 0) {
