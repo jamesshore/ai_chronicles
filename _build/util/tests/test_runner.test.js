@@ -41,7 +41,7 @@ describe("Test Runner", () => {
 	it("outputs failure report", async () => {
 		const { runner, output } = createRunner();
 
-		const module = createModule(IRRELEVANT_NAME, ({ it }) => {
+		const module = createModule(({ it }) => {
 			it(IRRELEVANT_NAME, () => {
 				throw new Error("my error");
 			});

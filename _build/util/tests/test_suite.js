@@ -17,14 +17,14 @@ const RUN_STATE = {
 
 export const DEFAULT_TIMEOUT_IN_MS = 2000;
 
-export function test(name, suiteFn) {
-	return TestSuite.describe(name, suiteFn, RUN_STATE.DEFAULT);
+export function test(suiteFn) {
+	return TestSuite.describe("", suiteFn, RUN_STATE.DEFAULT);
 }
-test.skip = function(name, suiteFn) {
-	return TestSuite.describe(name, suiteFn, RUN_STATE.SKIP);
+test.skip = function(suiteFn) {
+	return TestSuite.describe("", suiteFn, RUN_STATE.SKIP);
 };
-test.only = function(name, suiteFn) {
-	return TestSuite.describe(name, suiteFn, RUN_STATE.ONLY);
+test.only = function(suiteFn) {
+	return TestSuite.describe("", suiteFn, RUN_STATE.ONLY);
 };
 
 export function suite(runnables) {
