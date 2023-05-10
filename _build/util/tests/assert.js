@@ -9,12 +9,10 @@ const exports = chai;
 
 // By default, Chai's assert.equal does type conversions. DO. NOT. WANT.
 export const equal = chai.strictEqual;
-
 export const deepEqual = chai.deepEqual;
-
 export const isUndefined = chai.isUndefined;
-
 export const isNotUndefined = chai.isNotUndefined;
+export const atLeast = chai.isAtLeast;
 
 export function includes(actual, expected, message) {
 	checkExpected(expected);
