@@ -1,6 +1,6 @@
 // Copyright (c) 2013-2017 Titanium I.T. LLC. All rights reserved. See LICENSE.TXT for details.
 
-import Colors from "../util/colors.js";
+import * as colors from "../util/colors.js";
 import { readFileSync } from "node:fs";
 import * as paths from "../config/paths.js";
 
@@ -15,8 +15,8 @@ export function checkNodeVersion() {
 	if (actualVersion !== expectedVersion) {
 		console.log(
 			"\n" +
-			Colors.brightYellow.inverse("CAUTION: Different Node version.\n") +
-			Colors.brightYellow("This codebase was created for Node " + expectedVersion + ", but you have " + actualVersion + ".\n" +
+			colors.brightYellow.inverse("CAUTION: Different Node version.\n") +
+			colors.brightYellow("This codebase was created for Node " + expectedVersion + ", but you have " + actualVersion + ".\n" +
 			"If it doesn't work, try installing Node " + expectedVersion + ".") +
 			"\n"
 		);

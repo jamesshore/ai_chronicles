@@ -8,25 +8,23 @@ const COLOR_STYLES = {
 	inverse: "7;",
 };
 
-export default {
-	// this brute-force approach works better with IDE code completion than building the object at run-time.
-	black: colorFn(30),
-	red: colorFn(31),
-	green: colorFn(32),
-	yellow: colorFn(33),
-	blue: colorFn(34),
-	purple: colorFn(35),
-	cyan: colorFn(36),
-	white: colorFn(37),
-	brightBlack: colorFn(90),
-	brightRed: colorFn(91),
-	brightGreen: colorFn(92),
-	brightYellow: colorFn(93),
-	brightBlue: colorFn(94),
-	brightPurple: colorFn(95),
-	brightCyan: colorFn(96),
-	brightWhite: colorFn(97),
-};
+// this brute-force approach works better with IDE code completion than building the object at run-time.
+export const black = colorFn(30);
+export const red = colorFn(31);
+export const green = colorFn(32);
+export const yellow = colorFn(33);
+export const blue = colorFn(34);
+export const purple = colorFn(35);
+export const cyan = colorFn(36);
+export const white = colorFn(37);
+export const brightBlack = colorFn(90);
+export const brightRed = colorFn(91);
+export const brightGreen = colorFn(92);
+export const brightYellow = colorFn(93);
+export const brightBlue = colorFn(94);
+export const brightPurple = colorFn(95);
+export const brightCyan = colorFn(96);
+export const brightWhite = colorFn(97);
 
 function colorFn(color) {
 	const fn = encodeFn("", color);

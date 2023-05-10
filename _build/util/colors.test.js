@@ -1,7 +1,7 @@
 // Copyright Titanium I.T. LLC.
 
 import { describe, it, assert } from "./tests.js";
-import colors from "./colors.js";
+import * as colors from "./colors.js";
 
 describe("Colors", () => {
 

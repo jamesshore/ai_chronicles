@@ -3,6 +3,33 @@ import { describe, it, assert } from "../tests.js";
 
 describe("Assert", () => {
 
+	describe("objEqual()", () => {
+
+		it("passes if expected.equals() returns true", () => {
+			const expected = { equals() { return true; }};
+			expectPass(() => {
+				assert.objEqual({}, expected);
+			});
+		});
+
+		it("fails if expected.equals() returns false", () => {
+			const expected = { equals() { return false; }};
+			const actual = {};
+
+			expectFail(() => {
+				assert.objEqual(actual, expected);
+			}, "should be equal()", actual, expected);
+		});
+
+		it("fails if expected.equals() doesn't exist", () => {
+			expectFail(() => {
+				assert.objEqual({}, {});
+			}, "'expected' does not have equals() method");
+		});
+
+	});
+
+
 	describe("includes()", () => {
 
 		it("passes if actual includes string", () => {
@@ -10,7 +37,6 @@ describe("Assert", () => {
 				assert.includes("abcdef", "bcd");
 			});
 		});
-
 
 		it("fails if actual doesn't include string", () => {
 			expectFail(() => {

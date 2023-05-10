@@ -9,14 +9,14 @@ import lintConfig from "../config/eslint.conf.js";
 import shell from "shelljs";
 import { runMochaAsync } from "../runners/mocha_runner.js";
 import mochaConfig from "../config/mocha.conf.js";
-import Colors from "../util/colors.js";
+import * as colors from "../util/colors.js";
 import { pathToFile } from "../util/module_paths.js";
 import * as sh from "../util/sh.js";
 
 shell.config.fatal = true;
 
-const successColor = Colors.brightGreen;
-const failureColor = Colors.brightRed;
+const successColor = colors.brightGreen;
+const failureColor = colors.brightRed;
 
 const rootDir = pathToFile(import.meta.url, "../..");
 

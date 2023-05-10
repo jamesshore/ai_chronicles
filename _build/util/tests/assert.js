@@ -14,6 +14,24 @@ export const isUndefined = chai.isUndefined;
 export const isNotUndefined = chai.isNotUndefined;
 export const atLeast = chai.isAtLeast;
 
+export function objEqual(actual, expected, message) {
+	checkExpected(expected);
+
+	message = message ? `${message}: ` : "";
+	chai.isDefined(actual, message);
+	if (expected.equals === undefined) exports.fail(message + "'expected' does not have equals() method");
+	if (!expected.equals(actual)) fail(message, "should be equal()", actual, expected);
+}
+
+export function objNotEqual(actual, expected, message) {
+	checkExpected(expected);
+
+	message = message ? `${message}: ` : "";
+	chai.isDefined(actual, message);
+	if (actual.equals === undefined) exports.fail(message + "does not have equals() method");
+	exports.isFalse(actual.equals(expected), message + "expected '" + expected + "' and '" + actual + "' to be not be equal(), but they were");
+}
+
 export function includes(actual, expected, message) {
 	checkExpected(expected);
 	if (!actual.includes(expected)) {
