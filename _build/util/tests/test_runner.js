@@ -1,6 +1,5 @@
 // Copyright Titanium I.T. LLC.
-import { assert, describe, it } from "../tests.js";
-import { describe as describeLib } from "./describe.js";
+import { suite, fail } from "./test_suite.js";
 import { ConsoleOutput } from "../infrastructure/console_output.js";
 import path from "node:path";
 
@@ -19,7 +18,7 @@ export class TestRunner {
 			try {
 				const suite = (await import(filename)).default;
 				if (suite?.runAsync === undefined) {
-					return describeLib.fail(path.basename(filename), `doesn't export a test suite: ${filename}`);
+					return fail(path.basename(filename), `doesn't export a test suite: ${filename}`);
 				}
 				else {
 					suite.filename = filename;
@@ -27,12 +26,12 @@ export class TestRunner {
 				}
 			}
 			catch(err) {
-				return describeLib.fail(`error when requiring ${path.basename(filename)}`, err);
+				return fail(`error when requiring ${path.basename(filename)}`, err);
 			}
 		});
 
 		const suites = await Promise.all(suitePromises);
-		return await this.testModuleAsync(describeLib.suite(suites));
+		return await this.testModuleAsync(suite(suites));
 	}
 
 	async testModuleAsync(module) {

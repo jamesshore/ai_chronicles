@@ -1,6 +1,6 @@
 // Copyright Titanium I.T. LLC.
 import { describe, it, assert } from "../tests.js";
-import { describe as describeLib } from "./describe.js";
+import * as testSuite from "./test_suite.js";
 import { TestRunner } from "./test_runner.js";
 import { ConsoleOutput } from "../infrastructure/console_output.js";
 import { TestResult } from "./test_result.js";
@@ -18,7 +18,7 @@ describe("Test Runner", () => {
 	it("renders progress", async () => {
 		const { runner, output } = createRunner();
 
-		await runner.testModuleAsync(describeLib.suite([PASS_MODULE, PASS_MODULE]));
+		await runner.testModuleAsync(testSuite.suite([PASS_MODULE, PASS_MODULE]));
 		assert.deepEqual(output, [ PASS_PROGRESS, PASS_PROGRESS ]);
 	});
 
@@ -71,7 +71,7 @@ describe("Test Runner", () => {
 });
 
 function createModule(name, fn) {
-	return describeLib(name, fn);
+	return testSuite.test(name, fn);
 }
 
 function createRunner() {
@@ -83,5 +83,5 @@ function createRunner() {
 }
 
 async function failureCountAsync() {
-	return (await describeLib.fail("irrelevant name", new Error("irrelevant error")).runAsync()).summary();
+	return (await testSuite.fail("irrelevant name", new Error("irrelevant error")).runAsync()).summary();
 }

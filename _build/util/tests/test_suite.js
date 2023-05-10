@@ -5,7 +5,6 @@ import { TestResult } from "./test_result.js";
 // A simple but full-featured test runner. It allows me to get away from Mocha's idiosyncracies and have
 // more control over test execution, while also shielding me from dependency churn.
 
-const DEFAULT_TIMEOUT_IN_MS = 2000;
 const RUN_OPTIONS_TYPE = [ undefined, {
 	clock: [ undefined, Clock ],
 	notifyFn: [ undefined, Function ],
@@ -16,22 +15,25 @@ const RUN_STATE = {
 	ONLY: "only",
 };
 
-export function describe(name, suiteFn) {
+export const DEFAULT_TIMEOUT_IN_MS = 2000;
+
+export function test(name, suiteFn) {
 	return TestSuite.describe(name, suiteFn, RUN_STATE.DEFAULT);
 }
-describe.skip = function(name, suiteFn) {
+test.skip = function(name, suiteFn) {
 	return TestSuite.describe(name, suiteFn, RUN_STATE.SKIP);
 };
-describe.only = function(name, suiteFn) {
+test.only = function(name, suiteFn) {
 	return TestSuite.describe(name, suiteFn, RUN_STATE.ONLY);
 };
-describe.suite = function(suites) {
-	return new TestSuite("", RUN_STATE.DEFAULT, { runnables: suites });
-};
-describe.fail = function(name, error) {
+
+export function suite(runnables) {
+	return new TestSuite("", RUN_STATE.DEFAULT, { runnables });
+}
+
+export function fail(name, error) {
 	return new TestSuite("", RUN_STATE.DEFAULT, { runnables: [ new FailureTestCase(name, error) ] });
-};
-describe.DEFAULT_TIMEOUT_IN_MS = DEFAULT_TIMEOUT_IN_MS;
+}
 
 
 class TestSuite {

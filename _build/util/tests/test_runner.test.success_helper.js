@@ -1,7 +1,7 @@
 // Copyright Titanium I.T. LLC.
-import { describe } from "./describe.js";
+import { test } from "./test_suite.js";
 
-const result = describe("Successful Test Suite", ({ it }) => {
+const result = test("Successful Test Suite", ({ it }) => {
 
 	it("Successful Test", () => {
 		// passes

@@ -1,6 +1,6 @@
 // Copyright Titanium I.T. LLC.
 import { describe, it } from "../tests.js";
-import { describe as describeLib } from "./describe.js";
+import * as testSuite from "./test_suite.js";
 import * as assert from "./assert.js";
 import { Clock } from "../infrastructure/clock.js";
 import { TestResult } from "./test_result.js";
@@ -8,7 +8,7 @@ import { TestResult } from "./test_result.js";
 // Tests for my test library. (How meta.)
 
 const IRRELEVANT_NAME = "irrelevant name";
-const DEFAULT_TIMEOUT = describeLib.DEFAULT_TIMEOUT_IN_MS;
+const DEFAULT_TIMEOUT = testSuite.DEFAULT_TIMEOUT_IN_MS;
 const EXCEED_TIMEOUT = DEFAULT_TIMEOUT + 1;
 
 describe("Test Library", () => {
@@ -18,7 +18,7 @@ describe("Test Library", () => {
 		it("executes immediately (but tests don't)", () => {
 			let suiteRan = false;
 			let testRan = false;
-			describeLib(IRRELEVANT_NAME, ({ it }) => {
+			testSuite.test(IRRELEVANT_NAME, ({ it }) => {
 				suiteRan = true;
 				it(IRRELEVANT_NAME, () => {
 					testRan = true;
@@ -30,7 +30,7 @@ describe("Test Library", () => {
 		});
 
 		it("returns test results when run", async () => {
-			const suite = describeLib("my suite", ({ it }) => {
+			const suite = testSuite.test("my suite", ({ it }) => {
 				it("test 1", () => {});
 				it("test 2", () => {});
 				it("test 3", () => {});
@@ -47,7 +47,7 @@ describe("Test Library", () => {
 		});
 
 		it("can be nested", async () => {
-			const top = describeLib("top", ({ describe }) => {
+			const top = testSuite.test("top", ({ describe }) => {
 				describe("middle", ({ describe }) => {
 					describe("bottom", ({ it }) => {
 						it("my test", () => {});
@@ -68,13 +68,13 @@ describe("Test Library", () => {
 		});
 
 		it("can be created manually", async () => {
-			const suite1 = describeLib("suite1", ({ it }) => {
+			const suite1 = testSuite.test("suite1", ({ it }) => {
 				it("test1", () => {});
 			});
-			const suite2 = describeLib("suite2", ({ it }) => {
+			const suite2 = testSuite.test("suite2", ({ it }) => {
 				it("test2", () => {});
 			});
-			const combinedSuite = describeLib.suite([ suite1, suite2 ]);
+			const combinedSuite = testSuite.suite([ suite1, suite2 ]);
 
 			assert.objEqual(await combinedSuite.runAsync(),
 				TestResult.suite("", [
@@ -92,7 +92,7 @@ describe("Test Library", () => {
 			const myError = new Error("my error");
 			myError.stack = myError.stack = "my stack";
 
-			const suite = describeLib.fail("my reason", myError);
+			const suite = testSuite.fail("my reason", myError);
 			assert.deepEqual(await suite.runAsync(),
 				TestResult.suite("", [
 					TestResult.fail("my reason", myError),
@@ -101,7 +101,7 @@ describe("Test Library", () => {
 		});
 
 		it("can have write-only filename, which is incorporated into test result", async () => {
-			const suite = describeLib("my name", ({ it }) => {
+			const suite = testSuite.test("my name", ({ it }) => {
 				it("my test", () => {});
 			});
 			suite.filename = "/my/filename";
@@ -120,7 +120,7 @@ describe("Test Library", () => {
 
 		it("runs when its parent suite is run", async () => {
 			let testRan = false;
-			const suite = describeLib(IRRELEVANT_NAME, ({ it }) => {
+			const suite = testSuite.test(IRRELEVANT_NAME, ({ it }) => {
 				it(IRRELEVANT_NAME, () => {
 					testRan = true;
 				});
@@ -133,7 +133,7 @@ describe("Test Library", () => {
 
 		it("works with asynchronous code", async () => {
 			let testRan = false;
-			const suite = describeLib(IRRELEVANT_NAME, ({ it }) => {
+			const suite = testSuite.test(IRRELEVANT_NAME, ({ it }) => {
 				it(IRRELEVANT_NAME, async () => {
 					await new Promise((resolve) => {
 						setImmediate(() => {
@@ -162,7 +162,7 @@ describe("Test Library", () => {
 		});
 
 		it("runs notify function", async () => {
-			const suite = describeLib("my suite", ({ it }) => {
+			const suite = testSuite.test("my suite", ({ it }) => {
 				it("my test", () => {});
 			});
 
@@ -186,7 +186,7 @@ describe("Test Library", () => {
 				return () => ordering.push(message);
 			};
 
-			const suite = describeLib(IRRELEVANT_NAME, ({ beforeAll, afterAll, describe, it }) => {
+			const suite = testSuite.test(IRRELEVANT_NAME, ({ beforeAll, afterAll, describe, it }) => {
 				beforeAll(pushFn("parent before 1"));
 				beforeAll(pushFn("parent before 2"));
 				afterAll(pushFn("parent after 1"));
@@ -217,7 +217,7 @@ describe("Test Library", () => {
 		it("doesn't run beforeAll and afterAll when all children are skipped", async () => {
 			let beforeRan = false;
 			let afterRan = false;
-			const suite = describeLib("my suite", ({ it, beforeAll, afterAll }) => {
+			const suite = testSuite.test("my suite", ({ it, beforeAll, afterAll }) => {
 				beforeAll(() => {
 					beforeRan = true;
 				});
@@ -239,7 +239,7 @@ describe("Test Library", () => {
 				return () => ordering.push(message);
 			};
 
-			const suite = describeLib(IRRELEVANT_NAME, ({ beforeEach, afterEach, describe, it }) => {
+			const suite = testSuite.test(IRRELEVANT_NAME, ({ beforeEach, afterEach, describe, it }) => {
 				beforeEach(pushFn("parent before 1"));
 				beforeEach(pushFn("parent before 2"));
 				afterEach(pushFn("parent after 1"));
@@ -278,7 +278,7 @@ describe("Test Library", () => {
 		it("doesn't run beforeEach and afterEach when the test is skipped", async () => {
 			let beforeRan = false;
 			let afterRan = false;
-			const suite = describeLib("my suite", ({ it, beforeEach, afterEach }) => {
+			const suite = testSuite.test("my suite", ({ it, beforeEach, afterEach }) => {
 				beforeEach(() => {
 					beforeRan = true;
 				});
@@ -295,7 +295,7 @@ describe("Test Library", () => {
 
 		it("handles exception in beforeAll", async () => {
 			const error = new Error("my error");
-			const suite = describeLib("my suite", ({ it, beforeAll }) => {
+			const suite = testSuite.test("my suite", ({ it, beforeAll }) => {
 				beforeAll(() => {
 					throw error;
 				});
@@ -312,7 +312,7 @@ describe("Test Library", () => {
 
 		it("handles exception in afterAll", async () => {
 			const error = new Error("my error");
-			const suite = describeLib("my suite", ({ it, afterAll }) => {
+			const suite = testSuite.test("my suite", ({ it, afterAll }) => {
 				afterAll(() => {
 					throw error;
 				});
@@ -331,7 +331,7 @@ describe("Test Library", () => {
 
 		it("handles exception in beforeEach", async () => {
 			const error = new Error("my error");
-			const suite = describeLib("my suite", ({ it, beforeEach }) => {
+			const suite = testSuite.test("my suite", ({ it, beforeEach }) => {
 				beforeEach(() => {
 					throw error;
 				});
@@ -349,7 +349,7 @@ describe("Test Library", () => {
 
 		it("doesn't run test when beforeEach throws exception", async () => {
 			let testRan = false;
-			const suite = describeLib("my suite", ({ it, beforeEach }) => {
+			const suite = testSuite.test("my suite", ({ it, beforeEach }) => {
 				beforeEach(() => {
 					throw new Error();
 				});
@@ -364,7 +364,7 @@ describe("Test Library", () => {
 
 		it("handles exception in afterEach", async () => {
 			const error = new Error("my error");
-			const suite = describeLib("my suite", ({ it, afterEach }) => {
+			const suite = testSuite.test("my suite", ({ it, afterEach }) => {
 				afterEach(() => {
 					throw error;
 				});
@@ -382,7 +382,7 @@ describe("Test Library", () => {
 
 		it("runs afterEach() even when test throws exception", async() => {
 			let afterEachRan = false;
-			const suite = describeLib("my suite", ({ it, afterEach }) => {
+			const suite = testSuite.test("my suite", ({ it, afterEach }) => {
 				afterEach(() => {
 					afterEachRan = true;
 				});
@@ -399,7 +399,7 @@ describe("Test Library", () => {
 			const afterEachError = new Error("afterEach error");
 			const testError = new Error("test error");
 
-			const suite = describeLib("my suite", ({ it, afterEach }) => {
+			const suite = testSuite.test("my suite", ({ it, afterEach }) => {
 				afterEach(() => {
 					throw afterEachError;
 				});
@@ -425,7 +425,7 @@ describe("Test Library", () => {
 
 			let beforeTime = null;
 			let afterTime = null;
-			const suite = describeLib("my suite", ({ it, beforeEach, afterEach }) => {
+			const suite = testSuite.test("my suite", ({ it, beforeEach, afterEach }) => {
 				beforeEach(() => {
 					beforeTime = clock.now();
 				});
@@ -455,7 +455,7 @@ describe("Test Library", () => {
 
 			let itTime = null;
 			let afterTime = null;
-			const suite = describeLib("my suite", ({ it, beforeAll, afterAll }) => {
+			const suite = testSuite.test("my suite", ({ it, beforeAll, afterAll }) => {
 				beforeAll(async () => {
 					await clock.waitAsync(EXCEED_TIMEOUT);
 				});
@@ -485,7 +485,7 @@ describe("Test Library", () => {
 
 			let beforeTime = null;
 			let itTime = null;
-			const suite = describeLib("my suite", ({ it, beforeAll, afterAll }) => {
+			const suite = testSuite.test("my suite", ({ it, beforeAll, afterAll }) => {
 				beforeAll(() => {
 					beforeTime = clock.now();
 				});
@@ -518,7 +518,7 @@ describe("Test Library", () => {
 
 			let itTime = null;
 			let afterTime = null;
-			const suite = describeLib("my suite", ({ it, beforeEach, afterEach }) => {
+			const suite = testSuite.test("my suite", ({ it, beforeEach, afterEach }) => {
 				beforeEach(async () => {
 					await clock.waitAsync(EXCEED_TIMEOUT);
 				});
@@ -548,7 +548,7 @@ describe("Test Library", () => {
 
 			let beforeTime = null;
 			let itTime = null;
-			const suite = describeLib("my suite", ({ it, beforeEach, afterEach }) => {
+			const suite = testSuite.test("my suite", ({ it, beforeEach, afterEach }) => {
 				beforeEach(() => {
 					beforeTime = clock.now();
 				});
@@ -579,7 +579,7 @@ describe("Test Library", () => {
 				await clock.waitAsync(DEFAULT_TIMEOUT - 1);
 			};
 
-			const suite = describeLib("my suite", ({ it, beforeAll, afterAll, beforeEach, afterEach }) => {
+			const suite = testSuite.test("my suite", ({ it, beforeAll, afterAll, beforeEach, afterEach }) => {
 				beforeAll(notQuiteTimeoutFn);
 				beforeAll(notQuiteTimeoutFn);
 				afterAll(notQuiteTimeoutFn);
@@ -611,7 +611,7 @@ describe("Test Library", () => {
 				await clock.waitAsync(NEW_TIMEOUT - 1);
 			};
 
-			const suite = describeLib("my suite", ({
+			const suite = testSuite.test("my suite", ({
 				it, timeout, beforeAll, afterAll, beforeEach, afterEach
 			}) => {
 				timeout(NEW_TIMEOUT);
@@ -636,7 +636,7 @@ describe("Test Library", () => {
 			const NEW_TIMEOUT = DEFAULT_TIMEOUT * 10;
 
 			const clock = Clock.createNull();
-			const suite = describeLib("parent", ({ describe, timeout }) => {
+			const suite = testSuite.test("parent", ({ describe, timeout }) => {
 				timeout(NEW_TIMEOUT);
 				describe("child", ({ it }) => {
 					it("my test", async () => {
@@ -663,7 +663,7 @@ describe("Test Library", () => {
 	describe(".skip", () => {
 
 		it("skips tests that have no function", async () => {
-			const suite = describeLib(IRRELEVANT_NAME, ({ it }) => {
+			const suite = testSuite.test(IRRELEVANT_NAME, ({ it }) => {
 				it("my test");
 			});
 
@@ -673,7 +673,7 @@ describe("Test Library", () => {
 
 		it("skips tests that have '.skip'", async () => {
 			let testRan = false;
-			const suite = describeLib(IRRELEVANT_NAME, ({ it }) => {
+			const suite = testSuite.test(IRRELEVANT_NAME, ({ it }) => {
 				it.skip("my test", () => {
 					testRan = true;
 				});
@@ -685,14 +685,14 @@ describe("Test Library", () => {
 		});
 
 		it("skips suites that have no function", async () => {
-			const suite = describeLib("my suite");
+			const suite = testSuite.test("my suite");
 
 			const result = await suite.runAsync();
 			assert.objEqual(result, TestResult.suite("my suite", []));
 		});
 
 		it("recursively skips everything within a suite that has '.skip'", async () => {
-			const suite = describeLib.skip("parent", ({ describe, it }) => {
+			const suite = testSuite.test.skip("parent", ({ describe, it }) => {
 				it("test 1", () => {});
 				it("test 2", () => {});
 				describe("child", ({ it }) => {
@@ -718,7 +718,7 @@ describe("Test Library", () => {
 	describe(".only", () => {
 
 		it("if any tests are marked .only, it only runs those tests", async () => {
-			const suite = describeLib("my suite", ({ it }) => {
+			const suite = testSuite.test("my suite", ({ it }) => {
 				it.only(".only", () => {});
 				it("not .only", () => {});
 			});
@@ -732,7 +732,7 @@ describe("Test Library", () => {
 		});
 
 		it("if a suite is marked .only and none of its tests are, runs all of those tests", async () => {
-			const suite = describeLib("parent", ({ describe }) => {
+			const suite = testSuite.test("parent", ({ describe }) => {
 				describe("not .only", ({ it }) => {
 					it("test1", () => {});
 					it("test2", () => {});
@@ -758,7 +758,7 @@ describe("Test Library", () => {
 		});
 
 		it("if a suite is marked .only and none of its children are, run those tests recursively", async () => {
-			const suite = describeLib.only("parent", ({ describe }) => {
+			const suite = testSuite.test.only("parent", ({ describe }) => {
 				describe("child", ({ it }) => {
 					it("test", () => {});
 				});
@@ -774,7 +774,7 @@ describe("Test Library", () => {
 		});
 
 		it("if a suite is marked .only and a child is marked .skip, skip the child", async () => {
-			const suite = describeLib.only("parent", ({ describe }) => {
+			const suite = testSuite.test.only("parent", ({ describe }) => {
 				describe("child", ({ it }) => {
 					it.skip("test1", () => {});
 					it("test2", () => {});
@@ -792,7 +792,7 @@ describe("Test Library", () => {
 		});
 
 		it("if a suite is marked .skip and a child is marked .only, run the child", async () => {
-			const suite = describeLib.skip("parent", ({ describe }) => {
+			const suite = testSuite.test.skip("parent", ({ describe }) => {
 				describe("child", ({ it }) => {
 					it.only("test1", () => {});
 					it("test2", () => {});
@@ -810,7 +810,7 @@ describe("Test Library", () => {
 		});
 
 		it("if a suite is marked .only and a child suite is marked .skip, skip its children", async () => {
-			const suite = describeLib.only("parent", ({ describe }) => {
+			const suite = testSuite.test.only("parent", ({ describe }) => {
 				describe.skip("child", ({ it }) => {
 					it("test1", () => {});
 					it("test2", () => {});
@@ -828,7 +828,7 @@ describe("Test Library", () => {
 		});
 
 		it("if a suite is marked .skip and a child suite is marked .only, run its children", async () => {
-			const suite = describeLib.skip("parent", ({ describe }) => {
+			const suite = testSuite.test.skip("parent", ({ describe }) => {
 				describe.only("child", ({ it }) => {
 					it("test1", () => {});
 					it("test2", () => {});
@@ -851,7 +851,7 @@ describe("Test Library", () => {
 
 
 async function runTestAsync(testName, testFn) {
-	const suite = describeLib(IRRELEVANT_NAME, ({ it }) => {
+	const suite = testSuite.test(IRRELEVANT_NAME, ({ it }) => {
 		it(testName, testFn);
 	});
 	const result = await suite.runAsync();
