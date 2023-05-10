@@ -16,7 +16,7 @@ const RUN_STATE = {
 	ONLY: "only",
 };
 
-export default function describe(name, suiteFn) {
+export function describe(name, suiteFn) {
 	return TestSuite.describe(name, suiteFn, RUN_STATE.DEFAULT);
 }
 describe.skip = function(name, suiteFn) {

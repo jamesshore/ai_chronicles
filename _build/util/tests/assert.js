@@ -13,6 +13,7 @@ export const deepEqual = chai.deepEqual;
 export const isUndefined = chai.isUndefined;
 export const isNotUndefined = chai.isNotUndefined;
 export const atLeast = chai.isAtLeast;
+export const match = chai.match;
 
 export function objEqual(actual, expected, message) {
 	checkExpected(expected);

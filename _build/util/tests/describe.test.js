@@ -1,6 +1,6 @@
 // Copyright Titanium I.T. LLC.
 import { describe, it } from "../tests.js";
-import describeLib from "./describe.js";
+import { describe as describeLib } from "./describe.js";
 import * as assert from "./assert.js";
 import { Clock } from "../infrastructure/clock.js";
 import { TestResult } from "./test_result.js";
