@@ -1,5 +1,5 @@
 // Copyright Titanium I.T. LLC.
-import { describe, it, assert } from "./tests.js";
+import { describe, it, assert } from "../tests.js";
 
 describe("Assert", () => {
 
