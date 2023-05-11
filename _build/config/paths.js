@@ -73,6 +73,7 @@ export const testDependencies = memoizedDeglob([
 	...compilerDependencies(),
 ], [
 	`${buildDir}/util/dependency_analysis.js`,
+	`${buildDir}/node_modules/**/*`,
 ]);
 
 

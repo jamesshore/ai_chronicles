@@ -3,4 +3,4 @@
 . _build/scripts/prebuild.sh
 
 cd _build
-node scripts/run_build.js "$@"
+node --enable-source-maps --experimental-import-meta-resolve scripts/run_build.js "$@"

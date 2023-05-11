@@ -84,7 +84,12 @@ async function runBuild() {
 
 async function shellToBuildAsync(args) {
 	const command = "node";
-	const commandArgs = [ "--enable-source-maps", buildScript, ...args ];
+	const commandArgs = [
+		"--enable-source-maps",
+		"--experimental-import-meta-resolve",
+		buildScript,
+		...args,
+	];
 
 	const child = child_process.spawn(command, commandArgs, { stdio: "inherit" });
 	const spawnPromise = new Promise((resolve, reject) => {

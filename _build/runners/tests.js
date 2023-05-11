@@ -1,6 +1,7 @@
 // Copyright Titanium I.T. LLC.
 import * as colors from "../util/colors.js";
 import { TestRunner } from "../util/tests/test_runner.js";
+import path from "node:path";
 
 const failColor = colors.red;
 const timeoutColor = colors.purple;
@@ -9,7 +10,10 @@ const passColor = colors.green;
 const summaryColor = colors.brightWhite.dim;
 
 export async function runAsync({ header = "Testing", files }) {
-  if (files.length === 0) return;
+  if (files.length === 0) return {
+    failed: false,
+    passFiles: [],
+  };
 
   process.stdout.write(`${header}: `);
   const startTime = Date.now();
@@ -18,6 +22,7 @@ export async function runAsync({ header = "Testing", files }) {
     process.stdout.write("\n");
     throw new Error("No tests found");
   }
+
   renderSummary(startTime, testSummary);
 
   return {

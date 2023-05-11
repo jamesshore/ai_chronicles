@@ -1,9 +1,9 @@
 // Copyright Titanium I.T. LLC.
 
-import pathLib from "path";
+import pathLib from "node:path";
 
-// Matches 'require("file")' and detects if it has '//' in front.
-const REQUIRE_REGEX = /(\/\/)?.*?\brequire\s*?\(["'](.*?)["']/;
+// Matches 'import ... from "file"' and 'export ... from "file"', and detects if it has '//' in front.
+const IMPORT_REGEX = /(\/\/)?.*?\b(?:import|export) .*? from\s*?["'](.*?)["']/;
 
 // Matches '// dependency_analysis: file'. For manually specifying dependencies that don't need require(). One per line.
 const COMMENT_REGEX = /\/\/?\s*?dependency_analysis:\s*(.*?)\s*$/;
@@ -64,40 +64,40 @@ async function getAnalysisAsync(self, file) {
 }
 
 function performAnalysisAndCachePromise(self, file) {
-	const analysisPromise = performAnalysisAsync();
-	self._analysisCache[file] = analysisPromise;
+	self._analysisCache[file] = performAnalysisAsync();
 
 	async function performAnalysisAsync() {
 		const analyzedAt = Date.now();
 		const fileContents = await self._build.readFileAsync(file);
 		return {
 			analyzedAt,
-			dependencies: analyzeRequireStatements(self, file, fileContents),
+			dependencies: await findDependenciesAsync(self, file, fileContents),
 		};
 	}
 }
 
-function analyzeRequireStatements(self, file, fileContents) {
+async function findDependenciesAsync(self, file, fileContents) {
 	const basedir = pathLib.dirname(file);
-	return fileContents
-		.split("\n")
-		.map((line, index) => analyzeLine(line, index))
-		.filter((line) => line !== null);
+	const lines = fileContents.split("\n");
+	const dependencies = await Promise.all(lines.map((line, index) => analyzeLineAsync(line, index + 1)));
+	return dependencies.filter((line) => line !== null);
 
-	function analyzeLine(line, index) {
-		const dependency = getLineDependency(line);
-		if (dependency === null) return null;
+	async function analyzeLineAsync(line, lineNumber) {
+		const relativeDependency = getRelativeDependencyForLine(line);
+		if (relativeDependency === null) return null;
 
 		try {
-			const result = self._build.rootRelativePath(self._rootDir, require.resolve(dependency, { paths: [basedir] }));
-			if (!self._eligibleFiles.includes(result)) return null;
-			else return result;
+			const dependencyUrl = await import.meta.resolve(relativeDependency, `file://${file}`);
+			if (!dependencyUrl.startsWith("file://")) return null;
+
+			const dependency = dependencyUrl.substring("file://".length);
+			return self._eligibleFiles.includes(dependency) ? dependency : null;
 		}
 		catch(err) {
-			if (err.code === "MODULE_NOT_FOUND") {
+			if (err.code === "ERR_MODULE_NOT_FOUND" || err.code === "ERR_INVALID_URL") {
 				throw new Error(
 					"Dependency analysis failed\n" +
-					`Cannot find module '${dependency}' in '${file}'.\n  line ${index + 1}: ${line.trim()}`);
+					`Cannot find module '${relativeDependency}' in ${file}:${lineNumber}.`);
 			}
 			else {
 				throw err;
@@ -105,11 +105,11 @@ function analyzeRequireStatements(self, file, fileContents) {
 		}
 	}
 
-	function getLineDependency(line) {
-		const requireMatch = line.match(REQUIRE_REGEX);
+	function getRelativeDependencyForLine(line) {
+		const importMatch = line.match(IMPORT_REGEX);
 		const commentMatch = line.match(COMMENT_REGEX);
 
-		if (requireMatch !== null && requireMatch[1] !== "//") return requireMatch[2];
+		if (importMatch !== null && importMatch[1] !== "//") return importMatch[2];
 		else if (commentMatch !== null) return commentMatch[1];
 		else return null;
 	}
