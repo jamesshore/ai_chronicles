@@ -1,7 +1,158 @@
 // Copyright Titanium I.T. LLC.
-import { test, assert } from "../tests.js";
+import { test } from "../tests.js";
+import * as assert from "./assert.js";
 
 export default test(({ describe }) => {
+
+	describe("equal()", ({ it }) => {
+
+		it("passes if actual strictly equals expected", () => {
+			expectPass(() => {
+				assert.equal("abc", "abc");
+			});
+		});
+
+		it("fails if actual doesn't strictly equal expected", () => {
+			expectFail(() => {
+				assert.equal("1", 1);
+			}, "expected equality", "1", 1);
+		});
+
+	});
+
+
+	describe("deepEqual()", ({ it }) => {
+
+		it("passes if all elements of actual strictly equals all elements of expected, recursively", () => {
+			expectPass(() => {
+				assert.deepEqual({
+					a: 1,
+					b: {
+						c: 2,
+					},
+				}, {
+					a: 1,
+					b: {
+						c: 2,
+					},
+				});
+			});
+		});
+
+		it("fails if actual doesn't strictly and deeply equal expected", () => {
+			const actual = {
+				a: 1,
+				b: {
+					c: 2,
+				},
+			};
+			const expected = {
+				a: 1,
+				b: {
+					c: "2",
+				},
+			};
+			expectFail(() => {
+				assert.deepEqual(actual, expected);
+			}, "expected deep equality", actual, expected);
+		});
+
+	});
+
+
+	describe("matches()", ({ it }) => {
+
+		it("passes if actual matches regex", () => {
+			expectPass(() => {
+				assert.match("abc", /b/);
+			});
+		});
+
+		it("fails if actual doesn't match regex", () => {
+			expectFail(() => {
+				assert.match("abc", /x/);
+			}, "should match regex", "abc", /x/);
+		});
+
+	});
+
+
+	describe("matchesGroup()", ({ it }) => {
+
+		it("passes if first group in regex matches expected text", () => {
+			expectPass(() => {
+				assert.matchesGroup("-abc-", /-(.*?)-/, "abc");
+			});
+		});
+
+		it("when expected value is null, passes if first group in regex doesn't match", () => {
+			expectPass(() => {
+				assert.matchesGroup("-abc-", /x(.*?)x/, null);
+			});
+		});
+
+		it("fails if first group doesn't match expected text", () => {
+			expectFail(() => {
+				assert.matchesGroup("-abc-", /-(.*?)-/, "xxx");
+			}, "regex group: expected equality", "abc", "xxx");
+		});
+
+		it("fails if group not found", () => {
+			expectFail(() => {
+				assert.matchesGroup("-abc-", /x(.*?)x/, "abc");
+			}, "regex group expected 'abc', but nothing was found (searched with /x(.*?)x/)");
+		});
+
+		it("when expected value is null, fails if first group in regex matches", () => {
+			expectFail(() => {
+				assert.matchesGroup("-abc-", /-(.*?)-/, null);
+			}, "should not have found regex group, but it was 'abc' (searched with /-(.*?)-/)");
+		});
+
+		it("has optional failure message", () => {
+			expectFail(() => {
+				assert.matchesGroup("-actual-", /-(.*?)-/, "expected", "my failure message");
+			}, "my failure message: expected equality", "actual", "expected");
+		});
+
+	});
+
+
+	describe("includes()", ({ it }) => {
+
+		it("passes if actual includes string", () => {
+			expectPass(() => {
+				assert.includes("abcdef", "bcd");
+			});
+		});
+
+
+		it("fails if actual doesn't include string", () => {
+			expectFail(() => {
+				assert.includes("abcdef", "xxx");
+			}, "actual value should include expected value", "abcdef", "xxx");
+		});
+
+	});
+
+
+	describe("notIncludes()", ({ it }) => {
+
+		it("passes if actual doesn't include string", () => {
+			expectPass(() => {
+				assert.notIncludes("abcdef", "xxx");
+			});
+		});
+
+
+		it("fails if actual does include string", () => {
+			expectFail(() => {
+				assert.notIncludes("abcdef", "bcd");
+			}, "actual value should not include expected value", "abcdef", "bcd");
+		});
+
+	});
+
 
 	describe("objEqual()", ({ it }) => {
 
@@ -25,41 +176,6 @@ export default test(({ describe }) => {
 			expectFail(() => {
 				assert.objEqual({}, {});
 			}, "'expected' does not have equals() method");
-		});
-
-	});
-
-
-	describe("includes()", ({ it }) => {
-
-		it("passes if actual includes string", () => {
-			expectPass(() => {
-				assert.includes("abcdef", "bcd");
-			});
-		});
-
-		it("fails if actual doesn't include string", () => {
-			expectFail(() => {
-				assert.includes("abcdef", "xxx");
-			}, "'abcdef' should include 'xxx'", "abcdef", "xxx");
-		});
-
-	});
-
-
-	describe("notIncludes()", ({ it }) => {
-
-		it("passes if actual doesn't include string", function() {
-			expectPass(() => {
-				assert.doesNotInclude("abcdef", "xxx");
-			});
-		});
-
-
-		it("fails if actual does include string", function() {
-			expectFail(() => {
-				assert.doesNotInclude("abcdef", "bcd");
-			}, "'abcdef' should not include 'bcd'", "abcdef", "bcd");
 		});
 
 	});
@@ -103,7 +219,7 @@ export default test(({ describe }) => {
 					() => Promise.reject(new Error("my error")),
 					"not my error"
 				);
-			}, "expected 'my error' to equal 'not my error'", "my error", "not my error");
+			}, "expected equality", "my error", "not my error");
 		});
 
 		it("passes if function throws and error message doesn't match regex", async () => {
@@ -112,7 +228,7 @@ export default test(({ describe }) => {
 					() => Promise.reject(new Error("my complicated error message")),
 					/not-found/
 				);
-			}, "expected 'my complicated error message' to match /not-found/", "my complicated error message", /not-found/);
+			}, "should match regex", "my complicated error message", /not-found/);
 		});
 
 	});
