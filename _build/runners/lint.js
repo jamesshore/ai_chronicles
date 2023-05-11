@@ -10,11 +10,11 @@ const { ConfigArrayFactory } = Legacy;
 
 const linter = new eslint.Linter();
 
-export async function runAsync(header, filesToLint) {
-	if (filesToLint.length === 0) return;
+export async function runAsync({ header = "Linting", files }) {
+	if (files.length === 0) return;
 
 	process.stdout.write(`${header}: `);
-	const lintedFiles = await Promise.all(filesToLint.map(async (file) => {
+	const lintedFiles = await Promise.all(files.map(async (file) => {
 		const success = await validateFileAsync(file, lintConfig);
 		return success ? file : null;
 	}));

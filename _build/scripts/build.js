@@ -47,14 +47,16 @@ build.task("clean", () => {
 });
 
 build.task("lint", async () => {
-	const header = "Linting JavaScript";
 	const modifiedFiles = await Promise.all(paths.lintFiles().map(async (file) => {
 		const modified = await build.isModifiedAsync(file, lintDependencyName(file));
 		return modified ? file : null;
 	}));
 	const filesToLint = modifiedFiles.filter(file => file !== null);
 
-	const { failed, passFiles } = await lint.runAsync(header, filesToLint);
+	const { failed, passFiles } = await lint.runAsync({
+		header: "Linting JavaScript",
+		files: filesToLint,
+	});
 
 	await Promise.all(passFiles.map(async (file) => {
 		build.writeDirAndFileAsync(lintDependencyName(file), "lint ok");
@@ -66,7 +68,10 @@ build.task("lint", async () => {
 build.incrementalTask("test", paths.testDependencies(), async () => {
 	await build.runTasksAsync([ "compile" ]);
 
-	const { failed } = await tests.runAsync("Testing JavaScript", paths.testFiles());
+	const { failed } = await tests.runAsync({
+		header: "Testing JavaScript",
+		files: paths.testFiles(),
+	});
 	if (failed) throw new Error("Tests failed");
 });
 

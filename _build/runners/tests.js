@@ -8,12 +8,12 @@ const skipColor = colors.cyan;
 const passColor = colors.green;
 const summaryColor = colors.brightWhite.dim;
 
-export async function runAsync(header, testFiles) {
-  if (testFiles.length === 0) return;
+export async function runAsync({ header = "Testing", files }) {
+  if (files.length === 0) return;
 
   process.stdout.write(`${header}: `);
   const startTime = Date.now();
-  const testSummary = await TestRunner.create().testFilesAsync(testFiles);
+  const testSummary = await TestRunner.create().testFilesAsync(files);
   if (testSummary.total === 0) {
     process.stdout.write("\n");
     throw new Error("No tests found");
