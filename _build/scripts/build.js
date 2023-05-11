@@ -1,22 +1,21 @@
 // Copyright Titanium I.T. LLC.
 
-import Build from "../util/build_runner.js";
+import Build from "../util/build_lib.js";
 import DependencyAnalysis from "../util/dependency_analysis.js";
 import * as pathLib from "node:path";
 import * as paths from "../config/paths.js";
-import * as lint from "../util/lint_runner.js";
+import * as lint from "../runners/lint_runner.js";
 import lintConfig from "../config/eslint.conf.js";
 import shell from "shelljs";
-import { runMochaAsync } from "../util/mocha_runner.js";
-import mochaConfig from "../config/mocha.conf.js";
-import Colors from "../util/colors.js";
+import { TestRunner } from "../util/tests/test_runner.js";
+import * as colors from "../util/colors.js";
 import { pathToFile } from "../util/module_paths.js";
 import * as sh from "../util/sh.js";
 
 shell.config.fatal = true;
 
-const successColor = Colors.brightGreen;
-const failureColor = Colors.brightRed;
+const successColor = colors.brightGreen;
+const failureColor = colors.brightRed;
 
 const rootDir = pathToFile(import.meta.url, "../..");
 
@@ -72,21 +71,74 @@ build.task("lint", async () => {
 	process.stdout.write(footer);
 });
 
+
+const failColor = colors.red;
+const timeoutColor = colors.purple;
+const skipColor = colors.cyan;
+const passColor = colors.green;
+const summaryColor = colors.brightWhite.dim;
+
 build.incrementalTask("test", paths.testDependencies(), async () => {
 	await build.runTasksAsync([ "compile" ]);
 
 	process.stdout.write("Testing JavaScript: ");
-	await runMochaAsync({
-		files: paths.testFiles(),
-		options: mochaConfig,
-	});
+
+	const startTime = Date.now();
+	const testSummary = await TestRunner.create().testFilesAsync(paths.testFiles());
+	if (testSummary.total === 0) {
+		process.stdout.write("\n");
+		throw new Error("No tests found");
+	}
+
+	renderSummary({ startTime, ...testSummary });
+
+	await Promise.all(testSummary.successFiles.map(async (testFile) => {
+		await build.writeDirAndFileAsync(testDependencyName(testFile), "test ok");
+	}));
+
+	if (!testSummary.success) throw new Error("Tests failed");
+
+
+	function renderSummary({ startTime,
+													 total,
+													 pass = 0,
+													 fail = 0,
+													 timeout = 0,
+													 skip = 0
+												 }) {
+		const elapsedMs = Date.now() - startTime;
+		const elapsedSec = (elapsedMs / 1000).toFixed(2);
+		const msEach = (elapsedMs / (total - skip)).toFixed(1);
+		const render =
+			summaryColor(`\n(`) +
+			renderCount(fail, "failed", failColor) +
+			renderCount(timeout, "timed out", timeoutColor) +
+			renderCount(skip, "skipped", skipColor) +
+			renderCount(pass, "passed", passColor) +
+			summaryColor(`${msEach}ms avg., ${elapsedSec}s ttl.)\n`);
+		process.stdout.write(render);
+
+		function renderCount(number, description, color) {
+			if (number === 0) {
+				return "";
+			}
+			else {
+				return color(`${number} ${description}; `);
+			}
+		}
+	}
+
+	function testDependencyName(filename) {
+		return dependencyName(filename, "test");
+	}
+
 });
 
 build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
 	await build.runTasksAsync([ "compile" ]);
 	process.stdout.write("Bundling JavaScript: ");
 
-	const { code } = await sh.runInteractiveAsync(paths.bundler, [
+	const { code } = await sh.runInteractiveAsync(paths.rollup, [
 		"--failAfterWarnings",
 		"--silent",
 		"--config", `${paths.configDir}/rollup.conf.js`,
@@ -99,7 +151,7 @@ build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
 
 	function copyFrontEndFiles() {
 		paths.frontEndStaticFiles().forEach(file => {
-			const relativePath = build.rootRelativePath(paths.frontEndDir, file);
+			const relativePath = build.rootRelativePath(paths.frontEndSrcDir, file);
 			const destFile = `${paths.bundleDir}/${relativePath}`;
 			shell.mkdir("-p", pathLib.dirname(destFile));
 			shell.cp(file, destFile);
@@ -115,7 +167,7 @@ build.incrementalTask("compile", paths.compilerDependencies(), async () => {
 		"--config-file", `${paths.configDir}/swc.conf.json`,
 		"--out-dir", paths.typescriptDir,
 		"--quiet",
-		paths.frontEndDir
+		paths.frontEndSrcDir
 	]);
 	if (code !== 0) throw new Error("Compile failed");
 

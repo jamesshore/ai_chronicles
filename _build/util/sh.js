@@ -1,7 +1,7 @@
 // Copyright (c) 2012 Titanium I.T. LLC. All rights reserved. See LICENSE.txt for details.
 
 import child_process from "node:child_process";
-import Colors from "./colors.js";
+import * as colors from "./colors.js";
 
 export function runAsync(command, args) {
 	const argsString = args.map(arg => {
@@ -9,7 +9,7 @@ export function runAsync(command, args) {
 		if (arg.includes(" ")) return `"${arg}"`;
 		else return arg;
 	}).join(" ");
-	console.log(Colors.cyan(`» ${command} ${argsString}`));
+	console.log(colors.cyan(`» ${command} ${argsString}`));
 
 	return new Promise((resolve, reject) => {
 		let stdout = "";

@@ -1,9 +1,9 @@
 // Copyright Titanium I.T. LLC.
 
-import assert from "./assert.js";
-import colors from "./colors.js";
+import { test, assert } from "./tests.js";
+import * as colors from "./colors.js";
 
-describe("Colors", () => {
+export default test(({ it }) => {
 
 	const { red } = colors;    // see production code for other supported colors
 

@@ -23,7 +23,6 @@ export default {
 
 	"env": {
 		"node": true,
-		"mocha": true,
 		"browser": true,
 	},
 

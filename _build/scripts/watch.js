@@ -10,7 +10,7 @@ import pathLib from "path";
 import * as paths from "../config/paths.js";
 import sound from "sound-play";
 import * as sh from "../util/sh.js";
-import Colors from "../util/colors.js";
+import * as colors from "../util/colors.js";
 import { pathToFile } from "../util/module_paths.js";
 import child_process from "node:child_process";
 
@@ -22,8 +22,8 @@ const LINT_ERROR = 1;
 const FAILURE = 2;
 const TIMEOUT = 3;
 
-const watchColor = Colors.cyan;
-const errorColor = Colors.brightRed.inverse;
+const watchColor = colors.cyan;
+const errorColor = colors.brightRed.inverse;
 const buildScript = pathToFile(import.meta.url, "../scripts/run_build.js");
 
 const args = process.argv.slice(2);

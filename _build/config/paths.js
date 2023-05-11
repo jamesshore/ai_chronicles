@@ -9,30 +9,34 @@ export const configDir = `${buildDir}/config`;
 const buildBinariesDir = `${buildDir}/node_modules/.bin`;
 
 export const frontEndDir = `${rootDir}/front_end`;
+export const frontEndSrcDir = `${frontEndDir}/src`;
+
 export const backEndDir = `${rootDir}/back_end`;
 
 export const generatedDir = `${rootDir}/generated`;
 export const incrementalDir = `${generatedDir}/incremental-build`;
 export const typescriptDir = `${generatedDir}/compiled-typescript`;
-export const bundleSrc = `${typescriptDir}/front_end/index.js`;
+export const bundleSrc = `${typescriptDir}/front_end/src/index.js`;
 export const bundleDir = `${generatedDir}/bundle`;
 export const bundleFile = `${bundleDir}/bundle.js`;
 
 export const buildScript = `${rootDir}/build.sh`;
 export const tsc = `${buildBinariesDir}/tsc`;
 export const swc = `${buildBinariesDir}/swc`;
-export const bundler = `${buildBinariesDir}/rollup`;
+export const rollup = `${buildBinariesDir}/rollup`;
 export const httpServer = `${buildBinariesDir}/http-server`;
 
 export const watchFiles = memoizedDeglob([
 	`${buildDir}/**/*`,
-	`${frontEndDir}/**/*`,
+	`${frontEndSrcDir}/**/*`,
 	// `${backEndDir}/**/*`,
+], [
+	`${buildDir}/node_modules/**/*`,
 ]);
 
 export const watchRestartFiles = memoizedDeglob([
 	`${buildDir}/**/*`,
-	`${rootDir}/package.json`,
+	`${frontEndDir}/package.json`,
 	`${rootDir}/tsconfig.json`,
 	`${rootDir}/*.sh`,
 ], [
@@ -41,26 +45,27 @@ export const watchRestartFiles = memoizedDeglob([
 
 export const lintFiles = memoizedDeglob([
 	`${buildDir}/**/*.js`,
-	`${frontEndDir}/**/*.ts`,
-	`${frontEndDir}/**/*.tsx`,
+	`${frontEndSrcDir}/**/*.ts`,
+	`${frontEndSrcDir}/**/*.tsx`,
 ], [
 	`${buildDir}/node_modules/**/*`,
-	`${frontEndDir}/node_modules/**/*`,
 ]);
 
 export const frontEndStaticFiles = memoizedDeglob([
-	`${frontEndDir}/**/*.html`,
+	`${frontEndSrcDir}/**/*.html`,
 ]);
 
 export const compilerDependencies = memoizedDeglob([
 	...frontEndStaticFiles(),
-	`${frontEndDir}/**/*.ts`,
-	`${frontEndDir}/**/*.tsx`,
+	`${frontEndSrcDir}/**/*.ts`,
+	`${frontEndSrcDir}/**/*.tsx`,
 ]);
 
 export const testFiles = memoizedDeglob([
-	`${buildDir}/**/_*_test.js`,
-	`${generatedDir}/typescript/**/_*_test.js`,
+	`${buildDir}/**/*.test.js`,
+	`${generatedDir}/typescript/**/*.test.js`,
+], [
+	`${buildDir}/node_modules/**/*`,
 ]);
 
 export const testDependencies = memoizedDeglob([

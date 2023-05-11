@@ -3,7 +3,7 @@
 import * as repo from "../util/repo.js";
 import branches from "../config/branches.js";
 import pathLib from "node:path";
-import colors from "../util/colors.js";
+import * as colors from "../util/colors.js";
 
 runAsync();
 

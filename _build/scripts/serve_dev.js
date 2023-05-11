@@ -5,7 +5,7 @@
 // Thanks to Davide Alberto Molin for inspiring this code.
 // See https://www.letscodejavascript.com/v3/comments/live/7 for details.
 
-import { checkNodeVersion } from "../util/node_version_checker.js";
+import { checkNodeVersion } from "../runners/node_version_checker.js";
 import gaze from "gaze";
 import pathLib from "node:path";
 import { spawn } from "node:child_process";
