@@ -7,10 +7,10 @@ import * as paths from "../config/paths.js";
 import * as lint from "../runners/lint_runner.js";
 import lintConfig from "../config/eslint.conf.js";
 import shell from "shelljs";
-import { TestRunner } from "../util/tests/test_runner.js";
 import * as colors from "../util/colors.js";
 import { pathToFile } from "../util/module_paths.js";
 import * as sh from "../util/sh.js";
+import * as tests from "../runners/test_runner.js";
 
 shell.config.fatal = true;
 
@@ -72,66 +72,11 @@ build.task("lint", async () => {
 });
 
 
-const failColor = colors.red;
-const timeoutColor = colors.purple;
-const skipColor = colors.cyan;
-const passColor = colors.green;
-const summaryColor = colors.brightWhite.dim;
-
 build.incrementalTask("test", paths.testDependencies(), async () => {
 	await build.runTasksAsync([ "compile" ]);
 
-	process.stdout.write("Testing JavaScript: ");
-
-	const startTime = Date.now();
-	const testSummary = await TestRunner.create().testFilesAsync(paths.testFiles());
-	if (testSummary.total === 0) {
-		process.stdout.write("\n");
-		throw new Error("No tests found");
-	}
-
-	renderSummary({ startTime, ...testSummary });
-
-	await Promise.all(testSummary.successFiles.map(async (testFile) => {
-		await build.writeDirAndFileAsync(testDependencyName(testFile), "test ok");
-	}));
-
-	if (!testSummary.success) throw new Error("Tests failed");
-
-
-	function renderSummary({ startTime,
-													 total,
-													 pass = 0,
-													 fail = 0,
-													 timeout = 0,
-													 skip = 0
-												 }) {
-		const elapsedMs = Date.now() - startTime;
-		const elapsedSec = (elapsedMs / 1000).toFixed(2);
-		const msEach = (elapsedMs / (total - skip)).toFixed(1);
-		const render =
-			summaryColor(`\n(`) +
-			renderCount(fail, "failed", failColor) +
-			renderCount(timeout, "timed out", timeoutColor) +
-			renderCount(skip, "skipped", skipColor) +
-			renderCount(pass, "passed", passColor) +
-			summaryColor(`${msEach}ms avg., ${elapsedSec}s ttl.)\n`);
-		process.stdout.write(render);
-
-		function renderCount(number, description, color) {
-			if (number === 0) {
-				return "";
-			}
-			else {
-				return color(`${number} ${description}; `);
-			}
-		}
-	}
-
-	function testDependencyName(filename) {
-		return dependencyName(filename, "test");
-	}
-
+	const { failed } = await tests.runAsync("Testing JavaScript", paths.testFiles());
+	if (failed) throw new Error("Tests failed");
 });
 
 build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
