@@ -1,7 +1,7 @@
 // Copyright Titanium I.T. LLC.
 
 import * as sh from "./sh.js";
-import Colors from "./colors.js";
+import * as colors from "./colors.js";
 import * as paths from "../config/paths.js";
 
 // Functions to do things to the git repository
@@ -67,7 +67,7 @@ async function runAsync(command, ...args) {
 }
 
 async function runInteractiveAsync(command, ...args) {
-	console.log(Colors.cyan(`» ${command} ${args.join(" ")}`));
+	console.log(colors.cyan(`» ${command} ${args.join(" ")}`));
 
 	const result = await sh.runInteractiveAsync(command, args);
 	if (result.code !== 0) throw new Error(`${command} ${args[0]} failed`);
