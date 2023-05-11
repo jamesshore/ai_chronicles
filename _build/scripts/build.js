@@ -4,12 +4,12 @@ import Build from "../util/build_lib.js";
 import DependencyAnalysis from "../util/dependency_analysis.js";
 import * as pathLib from "node:path";
 import * as paths from "../config/paths.js";
-import * as lint from "../runners/lint_runner.js";
-import lintConfig from "../config/eslint.conf.js";
+import { runAsync } from "../runners/lint_runner.js";
 import shell from "shelljs";
 import * as colors from "../util/colors.js";
 import { pathToFile } from "../util/module_paths.js";
 import * as sh from "../util/sh.js";
+import * as lint from "../runners/lint_runner.js";
 import * as tests from "../runners/test_runner.js";
 
 shell.config.fatal = true;
@@ -47,28 +47,19 @@ build.task("clean", () => {
 });
 
 build.task("lint", async () => {
-	let header = "Linting JavaScript: ";
-	let footer = "";
+	const header = "Linting JavaScript";
+	const modifiedFiles = await Promise.all(paths.lintFiles().map(async (file) => {
+		const modified = await build.isModifiedAsync(file, lintDependencyName(file));
+		return modified ? file : null;
+	}));
+	const filesToLint = modifiedFiles.filter(file => file !== null);
 
-	const lintPromises = paths.lintFiles().map(async (lintFile) => {
-		const lintDependency = lintDependencyName(lintFile);
-		const modified = await build.isModifiedAsync(lintFile, lintDependency);
-		if (!modified) return true;
+	const { failed, passFiles } = await runAsync(header, filesToLint);
 
-		process.stdout.write(header);
-		header = "";
-		footer = "\n";
-		const success = await lint.validateFileAsync(lintFile, lintConfig);
-		if (success) build.writeDirAndFileAsync(lintDependency, "lint ok");
-
-		return success;
-	});
-
-	const successes = await Promise.all(lintPromises);
-	const overallSuccess = successes.every((success) => success === true);
-	if (!overallSuccess) throw new Error("Lint failed");
-
-	process.stdout.write(footer);
+	await Promise.all(passFiles.map(async (file) => {
+		build.writeDirAndFileAsync(lintDependencyName(file), "lint ok");
+	}));
+	if (failed) throw new Error("Lint failed");
 });
 
 
