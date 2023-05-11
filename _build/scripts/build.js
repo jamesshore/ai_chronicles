@@ -4,13 +4,13 @@ import Build from "../util/build_lib.js";
 import DependencyAnalysis from "../util/dependency_analysis.js";
 import * as pathLib from "node:path";
 import * as paths from "../config/paths.js";
-import { runAsync } from "../runners/lint_runner.js";
+import { runAsync } from "../runners/lint.js";
 import shell from "shelljs";
 import * as colors from "../util/colors.js";
 import { pathToFile } from "../util/module_paths.js";
 import * as sh from "../util/sh.js";
-import * as lint from "../runners/lint_runner.js";
-import * as tests from "../runners/test_runner.js";
+import * as lint from "../runners/lint.js";
+import * as tests from "../runners/tests.js";
 
 shell.config.fatal = true;
 
@@ -54,7 +54,7 @@ build.task("lint", async () => {
 	}));
 	const filesToLint = modifiedFiles.filter(file => file !== null);
 
-	const { failed, passFiles } = await runAsync(header, filesToLint);
+	const { failed, passFiles } = await lint.runAsync(header, filesToLint);
 
 	await Promise.all(passFiles.map(async (file) => {
 		build.writeDirAndFileAsync(lintDependencyName(file), "lint ok");
