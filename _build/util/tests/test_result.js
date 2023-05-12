@@ -77,7 +77,7 @@ class TestSuiteResult {
 	constructor(name, results, filename) {
 		this._name = name;
 		this._parent = null;
-		this.filename = filename;
+		this._filename = filename;
 		this.suite = results;
 		results.forEach(result => { result._parent = this; });
 	}
@@ -86,6 +86,14 @@ class TestSuiteResult {
 
 	get name() {
 		return determineName(this);
+	}
+
+	get filename() {
+		return this._filename ?? this._parent?.filename;
+	}
+
+	set filename(value) {
+		this._filename = value;
 	}
 
 	isSuccess() {
@@ -158,6 +166,10 @@ class TestCaseResult {
 
 	get name() {
 		return determineName(this);
+	}
+
+	get filename() {
+		return this._parent?.filename;
 	}
 
 	isSuccess() {
