@@ -10,9 +10,8 @@ const COMMENT_REGEX = /\/\/?\s*?dependency_analysis:\s*(.*?)\s*$/;
 
 export default class DependencyAnalysis {
 
-	constructor(build, rootDir, eligibleFiles) {
+	constructor(build, eligibleFiles) {
 		this._build = build;
-		this._rootDir = rootDir;
 		this._eligibleFiles = eligibleFiles;
 		this._analysisCache = {};
 	}
@@ -27,7 +26,7 @@ export default class DependencyAnalysis {
 
 	async updateAnalysisAsync() {
 		await Promise.all(this._eligibleFiles.map(async (file) => {
-			if (await isCachedAnalysisOutdated(this, file)) await performAnalysisAndCachePromise(this, file);
+			if (await isCachedAnalysisOutdated(this, file)) await getAnalysisAsync(this, file);
 		}));
 	}
 
@@ -53,9 +52,11 @@ async function isCachedAnalysisOutdated(self, file) {
 }
 
 async function getAnalysisAsync(self, file) {
-	if (self._analysisCache[file] === undefined) performAnalysisAndCachePromise(self, file);
 	try {
-		return await self._analysisCache[file];
+		if (self._analysisCache[file] === undefined) {
+			self._analysisCache[file] = await performAnalysisAsync(self, file);
+		}
+		return self._analysisCache[file];
 	}
 	catch (err) {
 		delete self._analysisCache[file];   // don't cache failed analysis
@@ -63,21 +64,16 @@ async function getAnalysisAsync(self, file) {
 	}
 }
 
-function performAnalysisAndCachePromise(self, file) {
-	self._analysisCache[file] = performAnalysisAsync();
-
-	async function performAnalysisAsync() {
-		const analyzedAt = Date.now();
-		const fileContents = await self._build.readFileAsync(file);
-		return {
-			analyzedAt,
-			dependencies: await findDependenciesAsync(self, file, fileContents),
-		};
-	}
+async function performAnalysisAsync(self, file) {
+	const analyzedAt = Date.now();
+	const fileContents = await self._build.readFileAsync(file);
+	return {
+		analyzedAt,
+		dependencies: await findDependenciesAsync(self, file, fileContents),
+	};
 }
 
 async function findDependenciesAsync(self, file, fileContents) {
-	const basedir = pathLib.dirname(file);
 	const lines = fileContents.split("\n");
 	const dependencies = await Promise.all(lines.map((line, index) => analyzeLineAsync(line, index + 1)));
 	return dependencies.filter((line) => line !== null);
