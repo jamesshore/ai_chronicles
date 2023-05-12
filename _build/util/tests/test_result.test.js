@@ -6,81 +6,6 @@ import * as colors from "../colors.js";
 
 export default test(({ describe }) => {
 
-	describe("test case", ({ it }) => {
-
-		it("passing tests have a name and status", () => {
-			const result = TestResult.pass("my name");
-
-			assert.deepEqual(result.name, [ "my name" ], "name");
-			assert.equal(result.status, TestResult.PASS, "status");
-			assert.isUndefined(result.error, "error");
-			assert.isUndefined(result.timeout, "timeout");
-		});
-
-		it("name includes parent suite", () => {
-			const test = createPass({ name: "test" });
-			createSuite({ name: "suite", results: [ test ]});
-			assert.deepEqual(test.name, [ "suite", "test" ]);
-		});
-
-		it("failing tests have a name, status, and error", () => {
-			const result = TestResult.fail("my name", new Error("my error"));
-
-			assert.deepEqual(result.name, [ "my name" ], "name");
-			assert.equal(result.status, TestResult.FAIL, "status");
-			assert.equal(result.error.message, "my error", "error");
-			assert.isUndefined(result.timeout, "timeout");
-		});
-
-		it("failing tests can have a string for the error", () => {
-			const result = TestResult.fail("irrelevant name", "my error");
-			assert.equal(result.error, "my error");
-		});
-
-		it("skipped tests have a name and status", () => {
-			const result = TestResult.skip("my name");
-
-			assert.deepEqual(result.name, [ "my name" ], "name");
-			assert.equal(result.status, TestResult.SKIP, "status");
-			assert.isUndefined(result.error, "error");
-			assert.isUndefined(result.timeout, "timeout");
-		});
-
-		it("timeout tests have name, status, and timeout", () => {
-			const result = TestResult.timeout("my name", 999);
-
-			assert.deepEqual(result.name, [ "my name" ], "name");
-			assert.equal(result.status, TestResult.TIMEOUT, "status");
-			assert.isUndefined(result.error, "error");
-			assert.equal(result.timeout, 999);
-		});
-
-		it("can be compared using equals()", () => {
-			assert.objEqual(TestResult.pass("my name"), TestResult.pass("my name"));
-			assert.objEqual(
-				TestResult.fail("my name", new Error("my error")),
-				TestResult.fail("my name", new Error("my error")),  // if name is same, error is same
-			);
-
-			assert.objNotEqual(TestResult.pass("my name"), TestResult.pass("different"));
-			assert.objNotEqual(TestResult.pass("my name"), TestResult.skip("my name"));
-			assert.objNotEqual(TestResult.pass("my name"), TestResult.fail("my name", new Error()));
-			assert.objNotEqual(
-				TestResult.timeout("my name", 1),
-				TestResult.timeout("my name", 2),
-			);
-		});
-
-		it("considers 'pass' and 'skipped' to be successes, and 'fail' and 'timeout' to be failures", () => {
-			assert.equal(createPass().isSuccess(), true, "pass");
-			assert.equal(createFail().isSuccess(), false, "fail");
-			assert.equal(createSkip().isSuccess(), true, "skip");
-			assert.equal(createTimeout().isSuccess(), false, "timeout");
-		});
-
-	});
-
-
 	describe("test suite", ({ it }) => {
 
 		it("has a name and list of test results", () => {
@@ -88,6 +13,17 @@ export default test(({ describe }) => {
 			const result = TestResult.suite("my name", list);
 
 			assert.deepEqual(result.name, [ "my name" ], "name");
+		});
+
+		it("has a filename based on parent", () => {
+			const grandchild = createPass();
+			const child = createSuite({ name: "child", results: [ grandchild ] });
+			const parent = createSuite({ name: "parent", results: [ child ] });
+			parent.filename = "/my/filename";
+
+			assert.equal(parent.filename, "/my/filename");
+			assert.equal(child.filename, "/my/filename");
+			assert.equal(grandchild.filename, "/my/filename");
 		});
 
 		it("name includes parent suite", () => {
@@ -237,6 +173,89 @@ export default test(({ describe }) => {
 	});
 
 
+	describe("test case", ({ it }) => {
+
+		it("passing tests have a name and status", () => {
+			const result = TestResult.pass("my name");
+
+			assert.deepEqual(result.name, [ "my name" ], "name");
+			assert.equal(result.status, TestResult.PASS, "status");
+			assert.isUndefined(result.error, "error");
+			assert.isUndefined(result.timeout, "timeout");
+		});
+
+		it("name includes parent suite", () => {
+			const test = createPass({ name: "test" });
+			createSuite({ name: "suite", results: [ test ]});
+			assert.deepEqual(test.name, [ "suite", "test" ]);
+		});
+
+		it("has filename based on parent suite", () => {
+			const test = createPass();
+			assert.isUndefined(test.filename, "without parent suite");
+
+			createSuite({ filename: "my_filename", results: [ test ]});
+			assert.equal(test.filename, "my_filename", "with parent suite");
+		});
+
+		it("failing tests have a name, status, and error", () => {
+			const result = TestResult.fail("my name", new Error("my error"));
+
+			assert.deepEqual(result.name, [ "my name" ], "name");
+			assert.equal(result.status, TestResult.FAIL, "status");
+			assert.equal(result.error.message, "my error", "error");
+			assert.isUndefined(result.timeout, "timeout");
+		});
+
+		it("failing tests can have a string for the error", () => {
+			const result = TestResult.fail("irrelevant name", "my error");
+			assert.equal(result.error, "my error");
+		});
+
+		it("skipped tests have a name and status", () => {
+			const result = TestResult.skip("my name");
+
+			assert.deepEqual(result.name, [ "my name" ], "name");
+			assert.equal(result.status, TestResult.SKIP, "status");
+			assert.isUndefined(result.error, "error");
+			assert.isUndefined(result.timeout, "timeout");
+		});
+
+		it("timeout tests have name, status, and timeout", () => {
+			const result = TestResult.timeout("my name", 999);
+
+			assert.deepEqual(result.name, [ "my name" ], "name");
+			assert.equal(result.status, TestResult.TIMEOUT, "status");
+			assert.isUndefined(result.error, "error");
+			assert.equal(result.timeout, 999);
+		});
+
+		it("can be compared using equals()", () => {
+			assert.objEqual(TestResult.pass("my name"), TestResult.pass("my name"));
+			assert.objEqual(
+				TestResult.fail("my name", new Error("my error")),
+				TestResult.fail("my name", new Error("my error")),  // if name is same, error is same
+			);
+
+			assert.objNotEqual(TestResult.pass("my name"), TestResult.pass("different"));
+			assert.objNotEqual(TestResult.pass("my name"), TestResult.skip("my name"));
+			assert.objNotEqual(TestResult.pass("my name"), TestResult.fail("my name", new Error()));
+			assert.objNotEqual(
+				TestResult.timeout("my name", 1),
+				TestResult.timeout("my name", 2),
+			);
+		});
+
+		it("considers 'pass' and 'skipped' to be successes, and 'fail' and 'timeout' to be failures", () => {
+			assert.equal(createPass().isSuccess(), true, "pass");
+			assert.equal(createFail().isSuccess(), false, "fail");
+			assert.equal(createSkip().isSuccess(), true, "skip");
+			assert.equal(createTimeout().isSuccess(), false, "timeout");
+		});
+
+	});
+
+
 	describe("progress rendering", ({ it }) => {
 
 		it("renders progress marker", () => {
@@ -289,7 +308,8 @@ export default test(({ describe }) => {
 					colors.brightWhite.bold("my name\n") +
 					"\nmy stack\n" +
 					colors.brightWhite("\nmy name »\n") +
-					colors.brightRed("my error\n"));
+					colors.brightRed("my error\n")
+				);
 			});
 
 			it("doesn't render stack trace when it doesn't exist (presumably, because error is a string)", () => {
@@ -298,6 +318,41 @@ export default test(({ describe }) => {
 					colors.brightWhite.bold("my name\n") +
 					colors.brightRed("\nmy error\n")
 				);
+			});
+
+			it("highlights stack trace lines that include test file", () => {
+				const error = new Error("my error");
+				error.stack = "Error: my error\n" +
+					"    at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_result.test.js:306:11\n" +
+					"    at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:222:10\n" +
+					"    at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/infrastructure/clock.js:68:26\n" +
+					"    at new Promise (<anonymous>)\n" +
+					"    at Clock.timeoutAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/infrastructure/clock.js:56:16)\n" +
+					"    at runOneTestFnAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:220:21)\n" +
+					"    at runTestAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:187:27)\n" +
+					"    at async TestCase._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:178:6)\n" +
+					"    at async TestSuite._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:110:17)\n" +
+					"    at async TestSuite._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:110:17)\n";
+
+				const expectedStack = "Error: my error\n" +
+					colors.brightWhite.bold("--> at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_result.test.js:306:11") + "\n" +
+					"    at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:222:10\n" +
+					"    at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/infrastructure/clock.js:68:26\n" +
+					"    at new Promise (<anonymous>)\n" +
+					"    at Clock.timeoutAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/infrastructure/clock.js:56:16)\n" +
+					"    at runOneTestFnAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:220:21)\n" +
+					"    at runTestAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:187:27)\n" +
+					"    at async TestCase._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:178:6)\n" +
+					"    at async TestSuite._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:110:17)\n" +
+					"    at async TestSuite._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:110:17)\n";
+
+				const testCase = createFail({ error });
+				const suite = createSuite({
+					results: [ testCase ],
+					filename: "file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_result.test.js",
+				});
+
+				assert.includes(testCase.render(), expectedStack);
 			});
 
 			it("renders expected and actual values (when they exist)", () => {

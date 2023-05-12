@@ -4,23 +4,19 @@ import Build from "../util/build_lib.js";
 import DependencyAnalysis from "../util/dependency_analysis.js";
 import * as pathLib from "node:path";
 import * as paths from "../config/paths.js";
-import * as lint from "../runners/lint_runner.js";
-import lintConfig from "../config/eslint.conf.js";
+import * as lint from "../runners/lint.js";
 import shell from "shelljs";
-import { TestRunner } from "../util/tests/test_runner.js";
 import * as colors from "../util/colors.js";
-import { pathToFile } from "../util/module_paths.js";
 import * as sh from "../util/sh.js";
+import childProcess from "node:child_process";
+import { pathToFile } from "../util/module_paths.js";
 
 shell.config.fatal = true;
 
 const successColor = colors.brightGreen;
 const failureColor = colors.brightRed;
 
-const rootDir = pathToFile(import.meta.url, "../..");
-
 const build = new Build({ incrementalDir: `${paths.incrementalDir}/tasks/` });
-const analysis = new DependencyAnalysis(build, rootDir, paths.testDependencies());
 
 export async function runBuildAsync(args) {
 	try {
@@ -29,6 +25,7 @@ export async function runBuildAsync(args) {
 	}
 	catch (err) {
 		console.log(`\n${failureColor.inverse("   BUILD FAILURE   ")}\n${failureColor.bold(err.message)}`);
+		// console.log(err.stack);
 		return err.failedTask;
 	}
 }
@@ -47,86 +44,64 @@ build.task("clean", () => {
 });
 
 build.task("lint", async () => {
-	let header = "Linting JavaScript: ";
-	let footer = "";
+	const modifiedFiles = await Promise.all(paths.lintFiles().map(async (file) => {
+		const modified = await build.isModifiedAsync(file, lintDependencyName(file));
+		return modified ? file : null;
+	}));
+	const filesToLint = modifiedFiles.filter(file => file !== null);
 
-	const lintPromises = paths.lintFiles().map(async (lintFile) => {
-		const lintDependency = lintDependencyName(lintFile);
-		const modified = await build.isModifiedAsync(lintFile, lintDependency);
-		if (!modified) return true;
-
-		process.stdout.write(header);
-		header = "";
-		footer = "\n";
-		const success = await lint.validateFileAsync(lintFile, lintConfig);
-		if (success) build.writeDirAndFileAsync(lintDependency, "lint ok");
-
-		return success;
+	const { failed, passFiles } = await lint.runAsync({
+		header: "Linting JavaScript",
+		files: filesToLint,
 	});
 
-	const successes = await Promise.all(lintPromises);
-	const overallSuccess = successes.every((success) => success === true);
-	if (!overallSuccess) throw new Error("Lint failed");
+	await Promise.all(passFiles.map(async (file) => {
+		build.writeDirAndFileAsync(lintDependencyName(file), "lint ok");
+	}));
+	if (failed) throw new Error("Lint failed");
 
-	process.stdout.write(footer);
+	function lintDependencyName(filename) {
+		return dependencyName(filename, "lint");
+	}
 });
 
-
-const failColor = colors.red;
-const timeoutColor = colors.purple;
-const skipColor = colors.cyan;
-const passColor = colors.green;
-const summaryColor = colors.brightWhite.dim;
-
+let analysis = null;
 build.incrementalTask("test", paths.testDependencies(), async () => {
 	await build.runTasksAsync([ "compile" ]);
 
-	process.stdout.write("Testing JavaScript: ");
-
-	const startTime = Date.now();
-	const testSummary = await TestRunner.create().testFilesAsync(paths.testFiles());
-	if (testSummary.total === 0) {
-		process.stdout.write("\n");
-		throw new Error("No tests found");
+	if (analysis === null) {
+		process.stdout.write("Analyzing JavaScript test dependencies: ");
+		analysis = new DependencyAnalysis(build, paths.testDependencies());
+		process.stdout.write(".\n");
+	}
+	else {
+		await analysis.updateAnalysisAsync();
 	}
 
-	renderSummary({ startTime, ...testSummary });
+	const testFiles = (await Promise.all(paths.testFiles().map(async (file) => {
+		return await analysis.isDependencyModifiedAsync(file, testDependencyName(file)) ? file : null;
+	})))
+	.filter(file => file !== null);
+	if (testFiles.length === 0) return;
 
-	await Promise.all(testSummary.successFiles.map(async (testFile) => {
-		await build.writeDirAndFileAsync(testDependencyName(testFile), "test ok");
+	const { failed, passFiles } = await new Promise((resolve, reject) => {
+		let result;
+
+		const child = childProcess.fork(
+			pathToFile(import.meta.url, "../runners/run_tests.js"),
+			[ "Testing JavaScript", ...testFiles ],
+			{ stdio: "inherit" }
+		);
+		child.on("message", (message) => {
+			result = message;
+		});
+		child.on("exit", () => resolve(result));
+	});
+	if (failed) throw new Error("Tests failed");
+
+	await Promise.all(passFiles.map(async (file) => {
+		await build.writeDirAndFileAsync(testDependencyName(file), "test ok");
 	}));
-
-	if (!testSummary.success) throw new Error("Tests failed");
-
-
-	function renderSummary({ startTime,
-													 total,
-													 pass = 0,
-													 fail = 0,
-													 timeout = 0,
-													 skip = 0
-												 }) {
-		const elapsedMs = Date.now() - startTime;
-		const elapsedSec = (elapsedMs / 1000).toFixed(2);
-		const msEach = (elapsedMs / (total - skip)).toFixed(1);
-		const render =
-			summaryColor(`\n(`) +
-			renderCount(fail, "failed", failColor) +
-			renderCount(timeout, "timed out", timeoutColor) +
-			renderCount(skip, "skipped", skipColor) +
-			renderCount(pass, "passed", passColor) +
-			summaryColor(`${msEach}ms avg., ${elapsedSec}s ttl.)\n`);
-		process.stdout.write(render);
-
-		function renderCount(number, description, color) {
-			if (number === 0) {
-				return "";
-			}
-			else {
-				return color(`${number} ${description}; `);
-			}
-		}
-	}
 
 	function testDependencyName(filename) {
 		return dependencyName(filename, "test");
@@ -184,10 +159,6 @@ build.incrementalTask("typecheck", paths.compilerDependencies(), async () => {
 });
 
 
-function lintDependencyName(filename) {
-	return dependencyName(filename, "lint");
-}
-
 function dependencyName(filename, extension) {
-	return `${paths.incrementalDir}/files/${build.rootRelativePath(rootDir, filename)}.${extension}`;
+	return `${paths.incrementalDir}/files/${build.rootRelativePath(paths.rootDir, filename)}.${extension}`;
 }

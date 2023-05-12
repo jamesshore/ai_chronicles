@@ -3,13 +3,13 @@ import * as util from "node:util";
 import * as path from "node:path";
 import * as colors from "../colors.js";
 
-const passColor = colors.white;
 const failColor = colors.brightRed.inverse;
+const passColor = colors.white;
 const skipColor = colors.cyan.dim;
 const timeoutColor = colors.purple.inverse;
 
 const headerColor = colors.brightWhite.bold;
-const testNameColor = colors.brightWhite;
+const highlightColor = colors.brightWhite;
 const errorMessageColor = colors.brightRed;
 const timeoutMessageColor = colors.purple;
 const expectedColor = colors.green;
@@ -77,7 +77,7 @@ class TestSuiteResult {
 	constructor(name, results, filename) {
 		this._name = name;
 		this._parent = null;
-		this.filename = filename;
+		this._filename = filename;
 		this.suite = results;
 		results.forEach(result => { result._parent = this; });
 	}
@@ -86,6 +86,14 @@ class TestSuiteResult {
 
 	get name() {
 		return determineName(this);
+	}
+
+	get filename() {
+		return this._filename ?? this._parent?.filename;
+	}
+
+	set filename(value) {
+		this._filename = value;
 	}
 
 	isSuccess() {
@@ -160,6 +168,10 @@ class TestCaseResult {
 		return determineName(this);
 	}
 
+	get filename() {
+		return this._parent?.filename;
+	}
+
 	isSuccess() {
 		return SUCCESS_MAP[this.status];
 	}
@@ -231,14 +243,28 @@ function renderBody(testCase) {
 }
 
 function renderFailure(testCase, name) {
-	const error = testCase.error.stack === undefined
-		? errorMessageColor(`\n${testCase.error}\n`)
-		:`\n${testCase.error.stack}\n` +
-			testNameColor(`\n${name[name.length - 1]} »\n`) +
+	let error;
+	if (testCase.error.stack === undefined) {
+		error = errorMessageColor(`\n${testCase.error}\n`);
+	} else {
+		error = `\n${renderStack(testCase.error, testCase.filename)}\n` +
+			highlightColor(`\n${name[name.length - 1]} »\n`) +
 			errorMessageColor(`${testCase.error.message}\n`);
+	}
 	const diff = renderDiff(testCase.error);
 
 	return `${error}${diff}`;
+}
+
+function renderStack(error, filename) {
+	const stack = error.stack.split("\n");
+	const highlighted = stack.map(line => {
+		if (!line.includes(filename)) return line;
+
+		line = line.replace(/    at/, "--> at");	// this code is vulnerable to changes in Node.js rendering
+		return headerColor(line);
+	});
+	return highlighted.join("\n");
 }
 
 function renderDiff(error) {

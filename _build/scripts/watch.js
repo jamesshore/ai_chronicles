@@ -12,6 +12,7 @@ import sound from "sound-play";
 import * as sh from "../util/sh.js";
 import * as colors from "../util/colors.js";
 import { pathToFile } from "../util/module_paths.js";
+import { runBuildAsync } from "./build.js";
 import child_process from "node:child_process";
 
 const TIMEOUT_IN_MS = 5000;
@@ -75,36 +76,11 @@ async function runBuild() {
 		buildStartedAt = Date.now();
 		console.log(watchColor(`\n\n\n\n*** BUILD> ${args.join(" ")}`));
 
-		const code = await shellToBuildAsync(args);
-		alertBuildResult(code);
+		const buildResult = await runBuildAsync(args);
+		alertBuildResult(buildResult);
 
 		buildRunning = false;
 	} while (buildQueued);
-}
-
-async function shellToBuildAsync(args) {
-	const command = "node";
-	const commandArgs = [ "--enable-source-maps", buildScript, ...args ];
-
-	const child = child_process.spawn(command, commandArgs, { stdio: "inherit" });
-	const spawnPromise = new Promise((resolve, reject) => {
-		child.on("error", reject);
-		child.on("exit", (code) => { resolve(code); });
-	});
-	const timeoutPromise = new Promise((resolve, reject) => {
-		setTimeout(resolve.bind(null, TIMEOUT), TIMEOUT_IN_MS);
-	});
-
-	const code = await Promise.race([ spawnPromise, timeoutPromise ]);
-	if (code === TIMEOUT) {
-		console.log("\n" + errorColor("  BUILD TIMED OUT  "));
-		child.kill();
-		await new Promise((resolve, reject) => {
-			child.on("exit", resolve);
-		});
-	}
-
-	return code;
 }
 
 function queueAnotherBuild() {
@@ -120,23 +96,20 @@ function queueAnotherBuild() {
 	}
 }
 
-function alertBuildResult(exitCode) {
-	if (PLAY_SOUNDS) playSoundAsync(pathForCode(exitCode));
+function alertBuildResult(failedTask) {
+	if (PLAY_SOUNDS) playSoundAsync(pathForCode(failedTask));
 
-	function pathForCode(exitCode) {
-		switch (exitCode) {
-			case SUCCESS: return "../sounds/success.wav";
-			case LINT_ERROR: return "../sounds/lint_error.wav";
-			case FAILURE:
-			case TIMEOUT:
-				return "../sounds/fail.wav";
-			default: throw new Error(`Unrecognized exit code from build: ${exitCode}`);
+	function pathForCode(failedTask) {
+		switch (failedTask) {
+			case null: return "../sounds/success.wav";
+			case "lint": return "../sounds/lint_error.wav";
+			default: return "../sounds/fail.wav";
 		}
 	}
 }
 
 async function cleanAndRestart(event, filepath) {
-	await shellToBuildAsync([ "clean" ]);
+	await runBuildAsync([ "clean" ]);
 	restart();
 }
 

@@ -54,18 +54,17 @@ export default test(({ describe }) => {
 	describe("repeat", ({ it }) => {
 
 		it("calls a function every N milliseconds", async () => {
-			const clock = Clock.create();
+			const clock = Clock.createNull();		// real clock is too nondeterministic to test directly
 
 			let runCount = 0;
 			const stopFn = clock.repeat(5, () => runCount++);
 
-			await clock.waitAsync(13);
-			assert.atLeast(runCount, 2, "repeat method");
+			await clock.tickAsync(15);
+			assert.equal(runCount, 3, "should call repeat function on regular interval");
 
-			const totalRan = runCount;
 			stopFn();
-			await clock.waitAsync(13);
-			assert.equal(runCount, totalRan, "stop function");
+			await clock.tickAsync(1000);
+			assert.equal(runCount, 3, "should not call repeat function after stop function called");
 		});
 
 	});
