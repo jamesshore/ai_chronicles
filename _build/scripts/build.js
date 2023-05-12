@@ -8,7 +8,8 @@ import * as lint from "../runners/lint.js";
 import shell from "shelljs";
 import * as colors from "../util/colors.js";
 import * as sh from "../util/sh.js";
-import * as tests from "../runners/tests.js";
+import childProcess from "node:child_process";
+import { pathToFile } from "../util/module_paths.js";
 
 shell.config.fatal = true;
 
@@ -59,8 +60,6 @@ build.task("lint", async () => {
 	}));
 	if (failed) throw new Error("Lint failed");
 
-
-
 	function lintDependencyName(filename) {
 		return dependencyName(filename, "lint");
 	}
@@ -72,7 +71,7 @@ build.incrementalTask("test", paths.testDependencies(), async () => {
 
 	if (analysis === null) {
 		process.stdout.write("Analyzing JavaScript test dependencies: ");
-		analysis = new DependencyAnalysis(build, paths.rootDir, paths.testDependencies());
+		analysis = new DependencyAnalysis(build, paths.testDependencies());
 		process.stdout.write(".\n");
 	}
 	else {
@@ -83,10 +82,20 @@ build.incrementalTask("test", paths.testDependencies(), async () => {
 		return await analysis.isDependencyModifiedAsync(file, testDependencyName(file)) ? file : null;
 	})))
 	.filter(file => file !== null);
+	if (testFiles.length === 0) return;
 
-	const { failed, passFiles } = await tests.runAsync({
-		header: "Testing JavaScript",
-		files: testFiles,
+	const { failed, passFiles } = await new Promise((resolve, reject) => {
+		let result;
+
+		const child = childProcess.fork(
+			pathToFile(import.meta.url, "../runners/run_tests.js"),
+			[ "Testing JavaScript", ...testFiles ],
+			{ stdio: "inherit" }
+		);
+		child.on("message", (message) => {
+			result = message;
+		});
+		child.on("exit", () => resolve(result));
 	});
 	if (failed) throw new Error("Tests failed");
 

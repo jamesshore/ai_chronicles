@@ -9,7 +9,11 @@ const skipColor = colors.cyan;
 const passColor = colors.green;
 const summaryColor = colors.brightWhite.dim;
 
-export async function runAsync({ header = "Testing", files }) {
+const [ header, ...files ] = process.argv.slice(2);
+const result = await runAsync({ header, files });
+process.send(result);
+
+export async function runAsync({ header = "Testing", files = [] }) {
   if (files.length === 0) return {
     failed: false,
     passFiles: [],

@@ -70,7 +70,7 @@ export const testFiles = memoizedDeglob([
 
 export const testDependencies = memoizedDeglob([
 	`${buildDir}/**/*.js`,
-	...compilerDependencies(),
+	// ...compilerDependencies(),
 ], [
 	`${buildDir}/util/dependency_analysis.js`,
 	`${buildDir}/node_modules/**/*`,
