@@ -18,6 +18,8 @@ export const backEndDir = `${rootDir}/back_end`;
 export const generatedDir = `${rootDir}/generated`;
 export const incrementalDir = `${generatedDir}/incremental-build`;
 export const typescriptDir = `${generatedDir}/compiled-typescript`;
+export const typescriptFrontEndDir = `${typescriptDir}/front_end`;
+export const typescriptFrontEndSrcDir = `${typescriptFrontEndDir}/src`;
 export const bundleSrc = `${typescriptDir}/front_end/src/index.js`;
 export const bundleDir = `${generatedDir}/bundle`;
 export const bundleFile = `${bundleDir}/bundle.js`;
@@ -72,7 +74,7 @@ export const testFiles = memoizedDeglob([
 
 export const testDependencies = memoizedDeglob([
 	`${buildDir}/**/*.js`,
-	`${typescriptDir}/**/*.js`,
+	`${typescriptFrontEndSrcDir}/**/*.js`,
 ], [
 	`${buildDir}/util/dependency_analysis.js`,
 	`${buildDir}/node_modules/**/*`,

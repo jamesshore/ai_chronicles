@@ -162,10 +162,9 @@ build.incrementalTask("compile", paths.compilerDependencies(), async () => {
 build.incrementalTask("copyFrontEndModules", [ paths.frontEndPackageJson ], async () => {
 	await timeAsync(async () => {
 		process.stdout.write("Copying front-end modules: ");
-		const targetDir = `${paths.typescriptDir}/front_end`;
-		shell.mkdir("-p", targetDir);
-		shell.cp(paths.frontEndPackageJson, targetDir);
-		shell.cp("-r", paths.frontEndNodeModules, targetDir);
+		shell.mkdir("-p", paths.typescriptFrontEndDir);
+		shell.cp(paths.frontEndPackageJson, paths.typescriptFrontEndDir);
+		shell.cp("-r", paths.frontEndNodeModules, paths.typescriptFrontEndDir);
 		process.stdout.write(".");
 	});
 });
