@@ -1,4 +1,4 @@
-// import { strict as assert } from "node:assert";
+import { test, assert } from "./tests.js";
 // import {render, screen, cleanup} from '@testing-library/react';
 // import userEvent from '@testing-library/user-event';
 import { Hello } from "./hello.js";
