@@ -1,9 +1,15 @@
-import { test, assert } from "./tests.js";
+import { test, assert } from "./util/tests.js";
 // import {render, screen, cleanup} from '@testing-library/react';
 // import userEvent from '@testing-library/user-event';
 import { Hello } from "./hello.js";
 
-export default "placeholder";
+export default test(({ it }) => {
+
+  it("runs tests", () => {
+    // assert.todo();
+  });
+
+});
 
 // import "global-jsdom/register";
 //
