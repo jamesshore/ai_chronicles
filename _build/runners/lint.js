@@ -5,6 +5,7 @@ import fs from "node:fs";
 import { promisify } from "node:util";
 import { Legacy } from "@eslint/eslintrc";
 import lintConfig from "../config/eslint.conf.js";
+import * as colors from "../util/colors.js";
 
 const { ConfigArrayFactory } = Legacy;
 
@@ -16,12 +17,14 @@ export async function runAsync({ header = "Linting", files }) {
 		passFiles: [],
 	};
 
+	const start = Date.now();
 	process.stdout.write(`${header}: `);
 	const lintedFiles = await Promise.all(files.map(async (file) => {
 		const success = await validateFileAsync(file, lintConfig);
 		return success ? file : null;
 	}));
-	process.stdout.write("\n");
+	const elapsedTime = ((Date.now() - start) / 1000).toFixed(2);
+	process.stdout.write(colors.white(` (${elapsedTime}s)\n`));
 
 	return {
 		failed: lintedFiles.some(file => file === null),
