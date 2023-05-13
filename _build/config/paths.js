@@ -9,6 +9,8 @@ export const configDir = `${buildDir}/config`;
 const buildBinariesDir = `${buildDir}/node_modules/.bin`;
 
 export const frontEndDir = `${rootDir}/front_end`;
+export const frontEndPackageJson = `${frontEndDir}/package.json`;
+export const frontEndNodeModules = `${frontEndDir}/node_modules`;
 export const frontEndSrcDir = `${frontEndDir}/src`;
 
 export const backEndDir = `${rootDir}/back_end`;
@@ -28,6 +30,7 @@ export const httpServer = `${buildBinariesDir}/http-server`;
 
 export const watchFiles = memoizedDeglob([
 	`${buildDir}/**/*`,
+	frontEndPackageJson,
 	`${frontEndSrcDir}/**/*`,
 	// `${backEndDir}/**/*`,
 ], [
@@ -36,8 +39,6 @@ export const watchFiles = memoizedDeglob([
 
 export const watchRestartFiles = memoizedDeglob([
 	`${buildDir}/**/*`,
-	`${frontEndDir}/package.json`,
-	`${rootDir}/tsconfig.json`,
 	`${rootDir}/*.sh`,
 ], [
 	`${buildDir}/node_modules/**/*`,
@@ -56,6 +57,7 @@ export const frontEndStaticFiles = memoizedDeglob([
 ]);
 
 export const compilerDependencies = memoizedDeglob([
+	frontEndPackageJson,
 	...frontEndStaticFiles(),
 	`${frontEndSrcDir}/**/*.ts`,
 	`${frontEndSrcDir}/**/*.tsx`,

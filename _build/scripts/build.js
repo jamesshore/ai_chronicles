@@ -135,8 +135,9 @@ build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
 });
 
 build.incrementalTask("compile", paths.compilerDependencies(), async () => {
-	process.stdout.write("Compiling JavaScript: ");
+	await build.runTasksAsync([ "copyFrontEndModules" ]);
 
+	process.stdout.write("Compiling JavaScript: ");
 	const { code } = await sh.runInteractiveAsync(paths.swc, [
 		"--config-file", `${paths.configDir}/swc.conf.json`,
 		"--out-dir", paths.typescriptDir,
@@ -144,7 +145,14 @@ build.incrementalTask("compile", paths.compilerDependencies(), async () => {
 		paths.frontEndSrcDir
 	]);
 	if (code !== 0) throw new Error("Compile failed");
+	process.stdout.write(".\n");
+});
 
+build.incrementalTask("copyFrontEndModules", [ paths.frontEndPackageJson ], async () => {
+	process.stdout.write("Copying front-end modules: ");
+	const targetDir = `${paths.typescriptDir}/front_end`;
+	shell.mkdir("-p", targetDir);
+	shell.cp("-r", paths.frontEndNodeModules, targetDir);
 	process.stdout.write(".\n");
 });
 
