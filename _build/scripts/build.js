@@ -164,6 +164,7 @@ build.incrementalTask("copyFrontEndModules", [ paths.frontEndPackageJson ], asyn
 		process.stdout.write("Copying front-end modules: ");
 		const targetDir = `${paths.typescriptDir}/front_end`;
 		shell.mkdir("-p", targetDir);
+		shell.cp(paths.frontEndPackageJson, targetDir);
 		shell.cp("-r", paths.frontEndNodeModules, targetDir);
 		process.stdout.write(".");
 	});

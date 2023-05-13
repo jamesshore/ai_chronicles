@@ -4,6 +4,7 @@
   "private": true,
   "author": "James Shore <jshore@jamesshore.com> and Ted M. Young <ted@tedmyoung.com>",
   "license": "MIT",
+  "type": "module",
   "dependencies": {
     "@types/react-dom": "^18.2.1",
     "react": "^18.2.0",
