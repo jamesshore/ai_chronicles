@@ -66,17 +66,16 @@ build.task("lint", async () => {
 });
 
 let analysis = null;
-build.incrementalTask("test", paths.testDependencies(), async () => {
+
+build.task("test", async () => {
 	await build.runTasksAsync([ "compile" ]);
 
+	process.stdout.write("Analyzing JavaScript dependencies: ");
 	if (analysis === null) {
-		process.stdout.write("Analyzing JavaScript test dependencies: ");
 		analysis = new DependencyAnalysis(build, paths.testDependencies());
-		process.stdout.write(".\n");
 	}
-	else {
-		await analysis.updateAnalysisAsync();
-	}
+	await analysis.updateAnalysisAsync();
+	process.stdout.write(".\n");
 
 	const testFiles = (await Promise.all(paths.testFiles().map(async (file) => {
 		return await analysis.isDependencyModifiedAsync(file, testDependencyName(file)) ? file : null;
