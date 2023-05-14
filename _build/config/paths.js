@@ -9,6 +9,8 @@ export const configDir = `${buildDir}/config`;
 const buildBinariesDir = `${buildDir}/node_modules/.bin`;
 
 export const frontEndDir = `${rootDir}/front_end`;
+export const frontEndPackageJson = `${frontEndDir}/package.json`;
+export const frontEndNodeModules = `${frontEndDir}/node_modules`;
 export const frontEndSrcDir = `${frontEndDir}/src`;
 
 export const backEndDir = `${rootDir}/back_end`;
@@ -16,6 +18,8 @@ export const backEndDir = `${rootDir}/back_end`;
 export const generatedDir = `${rootDir}/generated`;
 export const incrementalDir = `${generatedDir}/incremental-build`;
 export const typescriptDir = `${generatedDir}/compiled-typescript`;
+export const typescriptFrontEndDir = `${typescriptDir}/front_end`;
+export const typescriptFrontEndSrcDir = `${typescriptFrontEndDir}/src`;
 export const bundleSrc = `${typescriptDir}/front_end/src/index.js`;
 export const bundleDir = `${generatedDir}/bundle`;
 export const bundleFile = `${bundleDir}/bundle.js`;
@@ -28,6 +32,7 @@ export const httpServer = `${buildBinariesDir}/http-server`;
 
 export const watchFiles = memoizedDeglob([
 	`${buildDir}/**/*`,
+	frontEndPackageJson,
 	`${frontEndSrcDir}/**/*`,
 	// `${backEndDir}/**/*`,
 ], [
@@ -36,8 +41,6 @@ export const watchFiles = memoizedDeglob([
 
 export const watchRestartFiles = memoizedDeglob([
 	`${buildDir}/**/*`,
-	`${frontEndDir}/package.json`,
-	`${rootDir}/tsconfig.json`,
 	`${rootDir}/*.sh`,
 ], [
 	`${buildDir}/node_modules/**/*`,
@@ -56,21 +59,23 @@ export const frontEndStaticFiles = memoizedDeglob([
 ]);
 
 export const compilerDependencies = memoizedDeglob([
+	frontEndPackageJson,
 	...frontEndStaticFiles(),
 	`${frontEndSrcDir}/**/*.ts`,
 	`${frontEndSrcDir}/**/*.tsx`,
+	`${frontEndSrcDir}/**/*.js`,
 ]);
 
 export const testFiles = memoizedDeglob([
 	`${buildDir}/**/*.test.js`,
-	`${generatedDir}/typescript/**/*.test.js`,
+	`${typescriptFrontEndSrcDir}/**/*.test.js`,
 ], [
 	`${buildDir}/node_modules/**/*`,
 ]);
 
 export const testDependencies = memoizedDeglob([
 	`${buildDir}/**/*.js`,
-	// ...compilerDependencies(),
+	`${typescriptFrontEndSrcDir}/**/*.js`,
 ], [
 	`${buildDir}/util/dependency_analysis.js`,
 	`${buildDir}/node_modules/**/*`,

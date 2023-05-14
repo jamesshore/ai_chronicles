@@ -127,7 +127,7 @@ export default {
 		"@typescript-eslint/adjacent-overload-signatures": ERROR,
 		"@typescript-eslint/array-type": ERROR,
 		"@typescript-eslint/await-thenable": UNSUPPORTED,
-		"@typescript-eslint/ban-ts-comment": ERROR,
+		"@typescript-eslint/ban-ts-comment": [ ERROR, { "ts-ignore": "allow-with-description" }],
 		"@typescript-eslint/ban-tslint-comment": ERROR,
 		"@typescript-eslint/ban-types": [ ERROR, { types: { Function: false }}],
 		"@typescript-eslint/class-literal-property-style": UNSUPPORTED,

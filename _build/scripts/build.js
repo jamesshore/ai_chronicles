@@ -15,6 +15,7 @@ shell.config.fatal = true;
 
 const successColor = colors.brightGreen;
 const failureColor = colors.brightRed;
+const timingColor = colors.white;
 
 const build = new Build({ incrementalDir: `${paths.incrementalDir}/tasks/` });
 
@@ -38,9 +39,12 @@ build.task("quick", async () => {
 	await build.runTasksAsync([ "lint", "test" ]);
 });
 
-build.task("clean", () => {
-	console.log("Deleting generated files: .");
-	shell.rm("-rf", `${paths.generatedDir}/*`);
+build.task("clean", async () => {
+	await timeAsync(async () => {
+		process.stdout.write("Deleting generated files: ");
+		shell.rm("-rf", `${paths.generatedDir}/*`);
+		process.stdout.write(".");
+	});
 });
 
 build.task("lint", async () => {
@@ -66,17 +70,18 @@ build.task("lint", async () => {
 });
 
 let analysis = null;
-build.incrementalTask("test", paths.testDependencies(), async () => {
+
+build.task("test", async () => {
 	await build.runTasksAsync([ "compile" ]);
 
-	if (analysis === null) {
-		process.stdout.write("Analyzing JavaScript test dependencies: ");
-		analysis = new DependencyAnalysis(build, paths.testDependencies());
-		process.stdout.write(".\n");
-	}
-	else {
+	await timeAsync(async () => {
+		process.stdout.write("Analyzing JavaScript dependencies: ");
+		if (analysis === null) {
+			analysis = new DependencyAnalysis(build, paths.testDependencies());
+		}
 		await analysis.updateAnalysisAsync();
-	}
+		process.stdout.write(".");
+	});
 
 	const testFiles = (await Promise.all(paths.testFiles().map(async (file) => {
 		return await analysis.isDependencyModifiedAsync(file, testDependencyName(file)) ? file : null;
@@ -111,18 +116,21 @@ build.incrementalTask("test", paths.testDependencies(), async () => {
 
 build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
 	await build.runTasksAsync([ "compile" ]);
-	process.stdout.write("Bundling JavaScript: ");
 
-	const { code } = await sh.runInteractiveAsync(paths.rollup, [
-		"--failAfterWarnings",
-		"--silent",
-		"--config", `${paths.configDir}/rollup.conf.js`,
-	]);
-	if (code !== 0) throw new Error("Bundler failed");
+	await timeAsync(async () => {
 
-	process.stdout.write(".");
-	copyFrontEndFiles();
-	process.stdout.write("\n");
+		process.stdout.write("Bundling JavaScript: ");
+		const { code } = await sh.runInteractiveAsync(paths.rollup, [
+			"--failAfterWarnings",
+			"--silent",
+			"--config", `${paths.configDir}/rollup.conf.js`,
+		]);
+		if (code !== 0) throw new Error("Bundler failed");
+
+		process.stdout.write(".");
+		copyFrontEndFiles();
+		process.stdout.write(".");
+	});
 
 	function copyFrontEndFiles() {
 		paths.frontEndStaticFiles().forEach(file => {
@@ -136,29 +144,47 @@ build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
 });
 
 build.incrementalTask("compile", paths.compilerDependencies(), async () => {
-	process.stdout.write("Compiling JavaScript: ");
+	await build.runTasksAsync([ "copyFrontEndModules" ]);
 
-	const { code } = await sh.runInteractiveAsync(paths.swc, [
-		"--config-file", `${paths.configDir}/swc.conf.json`,
-		"--out-dir", paths.typescriptDir,
-		"--quiet",
-		paths.frontEndSrcDir
-	]);
-	if (code !== 0) throw new Error("Compile failed");
+	await timeAsync(async () => {
+		process.stdout.write("Compiling JavaScript: ");
+		const { code } = await sh.runInteractiveAsync(paths.swc, [
+			"--config-file", `${paths.configDir}/swc.conf.json`,
+			"--out-dir", paths.typescriptDir,
+			"--quiet",
+			paths.frontEndSrcDir
+		]);
+		if (code !== 0) throw new Error("Compile failed");
+		process.stdout.write(".");
+	});
+});
 
-	process.stdout.write(".\n");
+build.incrementalTask("copyFrontEndModules", [ paths.frontEndPackageJson ], async () => {
+	await timeAsync(async () => {
+		process.stdout.write("Copying front-end modules: ");
+		shell.mkdir("-p", paths.typescriptFrontEndDir);
+		shell.cp(paths.frontEndPackageJson, paths.typescriptFrontEndDir);
+		shell.cp("-r", paths.frontEndNodeModules, paths.typescriptFrontEndDir);
+		process.stdout.write(".");
+	});
 });
 
 build.incrementalTask("typecheck", paths.compilerDependencies(), async () => {
-	process.stdout.write("Type-checking JavaScript: ");
-
-	const { code } = await sh.runInteractiveAsync(paths.tsc, []);
-	if (code !== 0) throw new Error("Type check failed");
-
-	process.stdout.write(".\n");
+	await timeAsync(async () => {
+		process.stdout.write("Type-checking JavaScript: ");
+		const { code } = await sh.runInteractiveAsync(paths.tsc, []);
+		if (code !== 0) throw new Error("Type check failed");
+		process.stdout.write(".");
+	});
 });
-
 
 function dependencyName(filename, extension) {
 	return `${paths.incrementalDir}/files/${build.rootRelativePath(paths.rootDir, filename)}.${extension}`;
+}
+
+async function timeAsync(fnAsync) {
+	const start = Date.now();
+	await fnAsync();
+	const elapsedTime = ((Date.now() - start) / 1000).toFixed(2);
+	process.stdout.write(timingColor(` (${elapsedTime}s)\n`));
 }
