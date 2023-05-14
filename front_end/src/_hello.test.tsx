@@ -6,7 +6,7 @@ import { Hello } from "./hello.js";
 export default test(({ it }) => {
 
   it("runs tests", () => {
-    // assert.todo();
+    // assert.equal(1, 2);
   });
 
 });

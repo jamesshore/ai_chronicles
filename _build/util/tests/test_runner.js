@@ -47,7 +47,7 @@ export class TestRunner {
 
 function writeReport(output, result) {
 	const failures = result.allFailures();
-	const renderedFailures = failures.reduce((acc, failure) => acc + "\n" + failure.render() + "\n", "");
+	const renderedFailures = failures.reduce((acc, failure) => acc + "\n\n" + failure.render(), "");
 
 	if (failures.length > 0) output.write("\n" + renderedFailures);
 
