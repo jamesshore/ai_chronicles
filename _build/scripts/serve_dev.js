@@ -10,7 +10,7 @@ import gaze from "gaze";
 import pathLib from "node:path";
 import { spawn } from "node:child_process";
 import * as paths from "../config/paths.js";
-import colors from "../util/colors.js";
+import * as colors from "../util/colors.js";
 
 checkNodeVersion();
 
