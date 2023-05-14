@@ -1,9 +1,13 @@
 import { test, assert } from "./util/tests.js";
-// import {render, screen, cleanup} from '@testing-library/react';
+import {render, screen, cleanup} from '@testing-library/react';
 // import userEvent from '@testing-library/user-event';
 import { Hello } from "./hello.js";
 
-export default test(({ it }) => {
+export default test(({ it, afterEach }) => {
+
+  afterEach(() => {
+    cleanup();
+  });
 
   it("runs tests", () => {
     // assert.equal(1, 2);
@@ -11,6 +15,10 @@ export default test(({ it }) => {
 
 });
 
+// import { strict as assert } from "node:assert";
+// import {render, screen, cleanup} from '@testing-library/react';
+// import userEvent from '@testing-library/user-event';
+// import Hello from "./hello.js";
 // import "global-jsdom/register";
 //
 // describe("Hello", () => {

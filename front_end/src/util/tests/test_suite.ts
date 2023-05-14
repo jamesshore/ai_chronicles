@@ -57,7 +57,7 @@ interface Runnable {
 
 export type DescribeFunction = (testUtilities: TestHelpers) => void;
 export type ItFunction = () => void;
-export type TestDecorator = () => Promise<void>;
+export type TestDecorator = () => Promise<void> | void;
 export type TestDecoratorDefiner = (fn: TestDecorator) => void;
 type Milliseconds = number;
 
