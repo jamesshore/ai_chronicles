@@ -63,6 +63,7 @@ export const compilerDependencies = memoizedDeglob([
 	...frontEndStaticFiles(),
 	`${frontEndSrcDir}/**/*.ts`,
 	`${frontEndSrcDir}/**/*.tsx`,
+	`${frontEndSrcDir}/**/*.js`,
 ]);
 
 export const testFiles = memoizedDeglob([
