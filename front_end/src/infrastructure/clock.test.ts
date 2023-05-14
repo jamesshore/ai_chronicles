@@ -15,14 +15,9 @@ export default test(({ describe }) => {
 			assert.equal(actual, expected);
 		});
 
-		it("provides current year", () => {
-			const clock = Clock.createNull({ now: new Date("1 Mar 2050")});
-			assert.equal(clock.currentYearForUtc(), 2050);
-		});
-
 		it("tells us how many milliseconds have elapsed since a time", async () => {
 			const nullClock = Clock.createNull({ now: 50 });
-			await nullClock.tickAsync(999);
+			await nullClock.advanceNulledClockAsync(999);
 
 			assert.equal(nullClock.millisecondsSince(50), 999, "should compare to number");
 			assert.equal(nullClock.millisecondsSince(new Date(50)), 999, "should compare to Date");
@@ -59,11 +54,11 @@ export default test(({ describe }) => {
 			let runCount = 0;
 			const stopFn = clock.repeat(5, () => runCount++);
 
-			await clock.tickAsync(15);
+			await clock.advanceNulledClockAsync(15);
 			assert.equal(runCount, 3, "should call repeat function on regular interval");
 
 			stopFn();
-			await clock.tickAsync(1000);
+			await clock.advanceNulledClockAsync(1000);
 			assert.equal(runCount, 3, "should not call repeat function after stop function called");
 		});
 
@@ -72,7 +67,7 @@ export default test(({ describe }) => {
 
 	describe("timeouts", ({ it }) => {
 
-		function createTimeoutFn(result = "default timeout function result") {
+		function createTimeoutFn(result: string | Error = "default timeout function result") {
 			const timeoutFn = () => {
 				timeoutFn.ran = true;
 				if (result instanceof Error) return Promise.reject(result);
@@ -92,7 +87,7 @@ export default test(({ describe }) => {
 			assert.equal(await result, "result", "should return result of promise");
 			assert.equal(timeoutFnAsync.ran, false, "should not run timeout function");
 
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 			assert.equal(clock.now(), 0, "should resolve immediately");
 		});
 
@@ -108,7 +103,7 @@ export default test(({ describe }) => {
 			);
 			assert.equal(timeoutFnAsync.ran, false, "should not run timeout function");
 
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 			assert.equal(clock.now(), 0, "should resolve immediately");
 		});
 
@@ -119,7 +114,7 @@ export default test(({ describe }) => {
 			const promise = new Promise(() => {});
 			const timeoutPromise = clock.timeoutAsync(10000, () => promise, timeoutFnAsync);
 
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 			assert.equal(clock.now(), 10000, "should wait for timeout");
 			assert.equal(timeoutFnAsync.ran, true, "should run timeout function");
 			assert.equal(await timeoutPromise, "timeout result", "should return result of timeout function");
@@ -133,7 +128,7 @@ export default test(({ describe }) => {
 			const timeoutPromise = clock.timeoutAsync(10000, () => promise, timeoutFnAsync);
 			timeoutPromise.catch(() => {});   // prevent 'unhandled promise exception'
 
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 			assert.equal(clock.now(), 10000, "should wait for timeout");
 			assert.equal(timeoutFnAsync.ran, true, "should run timeout function");
 			await assert.throwsAsync(
@@ -152,7 +147,7 @@ export default test(({ describe }) => {
 			})();
 
 			const timeoutPromise = clock.timeoutAsync(10000, () => promise, timeoutFnAsync);
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 			assert.equal(await timeoutPromise, "timeout result");
 		});
 
@@ -171,45 +166,40 @@ export default test(({ describe }) => {
 			assert.equal(clock.now(), 300);
 		});
 
-		it("allows 'now' to be configured using date object", () => {
-			const clock = Clock.createNull({ now: new Date(400) });
-			assert.equal(clock.now(), 400);
-		});
-
 		it("can advance the clock", async () => {
 			const clock = Clock.createNull();
-			await clock.tickAsync(10);
+			await clock.advanceNulledClockAsync(10);
 			assert.equal(clock.now(), 10);
 		});
 
 		it("can advance the clock until all timers expired", async () => {
 			const clock = Clock.createNull();
 			clock.waitAsync(999);
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 			assert.equal(clock.now(), 999);
 		});
 
 		it("fails fast when attempting to advance the system clock", async () => {
 			const clock = Clock.create();
 			await assert.throwsAsync(
-				() => clock.tickAsync(10),
-				"Can't advance the clock because it isn't a null clock"
+				() => clock.advanceNulledClockAsync(10),
+				"Can't advance the clock because it isn't a nulled clock"
 			);
 			await assert.throwsAsync(
-				() => clock.tickUntilTimersExpireAsync(),
-				"Can't advance the clock because it isn't a null clock"
+				() => clock.advanceNulledClockUntilTimersExpireAsync(),
+				"Can't advance the clock because it isn't a nulled clock"
 			);
 		});
 
 		it("can wait", async () => {
 			const clock = Clock.createNull();
-			let wait = "waiting";
+			let wait: string | number = "waiting";
 
 			clock.waitAsync(10).then(() => {
 				wait = clock.now();
 			});
 			assert.equal(wait, "waiting");
-			await clock.tickAsync(20);
+			await clock.advanceNulledClockAsync(20);
 			assert.equal(wait, 10);
 		});
 
@@ -224,10 +214,10 @@ export default test(({ describe }) => {
 
 			assert.equal(runCount, 0, "start");
 
-			await clock.tickAsync(100);
+			await clock.advanceNulledClockAsync(100);
 			assert.equal(runCount, 1, "manual tick");
 
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 			assert.equal(runCount, 51, "automatic tick");
 		});
 

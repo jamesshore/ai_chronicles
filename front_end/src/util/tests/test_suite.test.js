@@ -438,7 +438,7 @@ export default test(({ describe }) => {
 			});
 
 			const actualPromise = suite.runAsync({ clock });
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 
 			assert.objEqual(await actualPromise,
 				TestResult.suite("", [
@@ -468,7 +468,7 @@ export default test(({ describe }) => {
 			});
 
 			const actualPromise = suite.runAsync({ clock });
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 
 			assert.objEqual(await actualPromise,
 				TestResult.suite("", [
@@ -499,7 +499,7 @@ export default test(({ describe }) => {
 			});
 
 			const actualPromise = suite.runAsync({ clock });
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 
 			assert.objEqual(await actualPromise,
 				TestResult.suite("", [
@@ -531,7 +531,7 @@ export default test(({ describe }) => {
 			});
 
 			const actualPromise = suite.runAsync({ clock });
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 
 			assert.objEqual(await actualPromise,
 				TestResult.suite("", [
@@ -561,7 +561,7 @@ export default test(({ describe }) => {
 			});
 
 			const actualPromise = suite.runAsync({ clock });
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 
 			assert.objEqual(await actualPromise,
 				TestResult.suite("", [
@@ -593,7 +593,7 @@ export default test(({ describe }) => {
 			});
 
 			const actualPromise = suite.runAsync({ clock });
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 
 			assert.objEqual(await actualPromise,
 				TestResult.suite("", [
@@ -623,7 +623,7 @@ export default test(({ describe }) => {
 			});
 
 			const actualPromise = suite.runAsync({ clock });
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 
 			assert.objEqual(await actualPromise,
 				TestResult.suite("", [
@@ -646,7 +646,7 @@ export default test(({ describe }) => {
 			});
 
 			const actualPromise = suite.runAsync({ clock });
-			await clock.tickUntilTimersExpireAsync();
+			await clock.advanceNulledClockUntilTimersExpireAsync();
 
 			assert.objEqual(await actualPromise,
 				TestResult.suite("", [
