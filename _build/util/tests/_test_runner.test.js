@@ -4,11 +4,11 @@ import * as testSuite from "./test_suite.js";
 import { TestRunner } from "./test_runner.js";
 import { ConsoleOutput } from "../infrastructure/console_output.js";
 import { TestResult } from "./test_result.js";
-/* dependency: ./test_runner.test.success_helper.js */
-/* dependency: ./test_runner.test.no_module_helper.js */
-/* dependency: ./test_runner.test.bad_module_helper.js */
+/* dependency: ./_test_runner.test.success_helper.js */
+/* dependency: ./_test_runner.test.no_module_helper.js */
+/* dependency: ./_test_runner.test.bad_module_helper.js */
 
-import PASS_MODULE from "./test_runner.test.success_helper.js";
+import PASS_MODULE from "./_test_runner.test.success_helper.js";
 
 const IRRELEVANT_NAME = "irrelevant name";
 const PASS_PROGRESS = TestResult.pass("irrelevant name").renderProgress();
@@ -25,7 +25,7 @@ export default test(({ it }) => {
 	it("requires files", async () => {
 		const { runner, output } = createRunner();
 
-		await runner.testFilesAsync([ "./test_runner.test.success_helper.js" ]);
+		await runner.testFilesAsync([ "./_test_runner.test.success_helper.js" ]);
 		assert.deepEqual(output, [ PASS_PROGRESS ]);
 	});
 
@@ -33,7 +33,7 @@ export default test(({ it }) => {
 		const { runner } = createRunner();
 
 		assert.deepEqual(
-			await runner.testFilesAsync([ "./test_runner.test.success_helper.js" ]),
+			await runner.testFilesAsync([ "./_test_runner.test.success_helper.js" ]),
 			(await PASS_MODULE.runAsync()).summary(),
 		);
 	});
@@ -54,8 +54,8 @@ export default test(({ it }) => {
 	it("fails gracefully if module fails to require()", async () => {
 		const { runner, output } = createRunner();
 
-		const counts = await runner.testFilesAsync([ "./test_runner.test.bad_module_helper.js" ]);
-		assert.match(output[0], /error when requiring test_runner.test.bad_module_helper.js/);
+		const counts = await runner.testFilesAsync([ "./_test_runner.test.bad_module_helper.js" ]);
+		assert.match(output[0], /error when requiring _test_runner.test.bad_module_helper.js/);
 		assert.match(output[0], /my require error/);
 		assert.deepEqual(counts, await failureCountAsync());
 	});
@@ -63,8 +63,8 @@ export default test(({ it }) => {
 	it("fails gracefully if module isn’t a test suite", async () => {
 		const { runner, output } = createRunner();
 
-		const counts = await runner.testFilesAsync([ "./test_runner.test.no_module_helper.js" ]);
-		assert.match(output[0], /doesn't export a test suite: \.\/test_runner.test.no_module_helper.js/);
+		const counts = await runner.testFilesAsync([ "./_test_runner.test.no_module_helper.js" ]);
+		assert.match(output[0], /doesn't export a test suite: \.\/_test_runner.test.no_module_helper.js/);
 		assert.deepEqual(counts, await failureCountAsync());
 	});
 

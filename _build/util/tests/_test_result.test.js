@@ -2,7 +2,7 @@
 import { test, assert } from "../tests.js";
 import { TestResult } from "./test_result.js";
 import * as util from "node:util";
-import * as colors from "./colors.js";
+import * as colors from "../colors.js";
 
 export default test(({ describe }) => {
 
@@ -323,33 +323,33 @@ export default test(({ describe }) => {
 			it("highlights stack trace lines that include test file", () => {
 				const error = new Error("my error");
 				error.stack = "Error: my error\n" +
-					"    at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_result.test.js:306:11\n" +
-					"    at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.ts:222:10\n" +
+					"    at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/_test_result.test.js:306:11\n" +
+					"    at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:222:10\n" +
 					"    at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/infrastructure/clock.js:68:26\n" +
 					"    at new Promise (<anonymous>)\n" +
 					"    at Clock.timeoutAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/infrastructure/clock.js:56:16)\n" +
-					"    at runOneTestFnAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.ts:220:21)\n" +
-					"    at runTestAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.ts:187:27)\n" +
-					"    at async TestCase._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.ts:178:6)\n" +
-					"    at async TestSuite._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.ts:110:17)\n" +
-					"    at async TestSuite._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.ts:110:17)\n";
+					"    at runOneTestFnAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:220:21)\n" +
+					"    at runTestAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:187:27)\n" +
+					"    at async TestCase._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:178:6)\n" +
+					"    at async TestSuite._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:110:17)\n" +
+					"    at async TestSuite._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:110:17)\n";
 
 				const expectedStack = "Error: my error\n" +
-					colors.brightWhite.bold("--> at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_result.test.js:306:11") + "\n" +
-					"    at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.ts:222:10\n" +
+					colors.brightWhite.bold("--> at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/_test_result.test.js:306:11") + "\n" +
+					"    at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:222:10\n" +
 					"    at file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/infrastructure/clock.js:68:26\n" +
 					"    at new Promise (<anonymous>)\n" +
 					"    at Clock.timeoutAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/infrastructure/clock.js:56:16)\n" +
-					"    at runOneTestFnAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.ts:220:21)\n" +
-					"    at runTestAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.ts:187:27)\n" +
-					"    at async TestCase._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.ts:178:6)\n" +
-					"    at async TestSuite._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.ts:110:17)\n" +
-					"    at async TestSuite._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.ts:110:17)\n";
+					"    at runOneTestFnAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:220:21)\n" +
+					"    at runTestAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:187:27)\n" +
+					"    at async TestCase._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:178:6)\n" +
+					"    at async TestSuite._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:110:17)\n" +
+					"    at async TestSuite._recursiveRunAsync (file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_suite.js:110:17)\n";
 
 				const testCase = createFail({ error });
 				const suite = createSuite({
 					results: [ testCase ],
-					filename: "file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/test_result.test.js",
+					filename: "file:///Users/jshore/Documents/Projects/ai_chronicles/_build/util/tests/_test_result.test.js",
 				});
 
 				assert.includes(testCase.render(), expectedStack);

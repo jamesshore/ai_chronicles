@@ -3,13 +3,13 @@ import { test, assert } from "../tests.js";
 import childProcess from "node:child_process";
 import { ConsoleOutput } from "./console_output.js";
 import { pathToFile } from "../module_paths.js";
-/* dependency: ./console_output.test.helper.js */
+/* dependency: ./_console_output.test.helper.js */
 
 export default test(({ it }) => {
 
 	it("real version writes to stdout (or stderr), null version doesn't", async () => {
 		const { stdout, stderr } = await runModuleAsync(
-			pathToFile(import.meta.url, "./console_output.test.helper.js"),
+			pathToFile(import.meta.url, "./_console_output.test.helper.js"),
 			{ failOnStderr: false }
 		);
 		assert.equal(stdout, "string stdout\nbuffer stdout\n");
