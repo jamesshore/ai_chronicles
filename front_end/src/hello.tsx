@@ -2,8 +2,8 @@ export function Hello({
   name,
   onClick,
 }: {
-  name: string,
-  onClick: () => void,
+  name?: string,
+  onClick?: () => void,
 }) {
   return <>
     <h1>Hello from React, {name}!</h1>
