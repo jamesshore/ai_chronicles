@@ -1,6 +1,7 @@
 import { test, assert } from "./util/tests.js";
-import {render, screen, cleanup} from '@testing-library/react';
-// import userEvent from '@testing-library/user-event';
+import { render, screen, cleanup } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import "global-jsdom/register";
 import { Hello } from "./hello.js";
 
 export default test(({ it, afterEach }) => {
@@ -9,8 +10,10 @@ export default test(({ it, afterEach }) => {
     cleanup();
   });
 
-  it("runs tests", () => {
-    // assert.equal(1, 2);
+  it("renders", () => {
+    const { getByRole } = render(<Hello name={"my_name"}/>);
+    const header = getByRole("heading");
+    assert.match(header.innerHTML, /my_name/);
   });
 
 });
