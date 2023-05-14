@@ -1,6 +1,4 @@
 // Copyright Titanium I.T. LLC.
-
-
 import { test, assert } from "./tests.js";
 import * as colors from "./colors.js";
 

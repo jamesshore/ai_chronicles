@@ -7,7 +7,7 @@ const failColor = colors.red;
 const timeoutColor = colors.purple;
 const skipColor = colors.cyan;
 const passColor = colors.green;
-const summaryColor = colors.brightWhite.dim;
+const summaryColor = colors.white;
 
 const [ header, ...files ] = process.argv.slice(2);
 const result = await runAsync({ header, files });
@@ -37,16 +37,21 @@ export async function runAsync({ header = "Testing", files = [] }) {
 
 function renderSummary(startTime, summary) {
   const elapsedMs = Date.now() - startTime;
-  const elapsedSec = (elapsedMs / 1000).toFixed(2);
+  const elapsedRender = `${(elapsedMs / 1000).toFixed(2)}s`;
   const msEach = (elapsedMs / (summary.total - summary.skip)).toFixed(1);
-  const render =
-    summaryColor(`\n(`) +
+
+  const countRender =
     renderCount(summary.fail, "failed", failColor) +
     renderCount(summary.timeout, "timed out", timeoutColor) +
     renderCount(summary.skip, "skipped", skipColor) +
     renderCount(summary.pass, "passed", passColor) +
-    summaryColor(`${msEach}ms avg., ${elapsedSec}s ttl.)\n`);
-  process.stdout.write(render);
+    summaryColor(`${msEach}ms avg.`);
+
+  const fullRender = summary.success
+    ? summaryColor(` (${elapsedRender})\n(`) + countRender + summaryColor(")\n")
+    : summaryColor(`\n(`) + countRender + summaryColor(`; ${elapsedRender} ttl.)\n`);
+
+  process.stdout.write(fullRender);
 }
 
 function renderCount(number, description, color) {
