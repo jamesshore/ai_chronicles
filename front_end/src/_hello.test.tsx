@@ -22,7 +22,9 @@ export default test(({ it, afterEach }) => {
       called = "called";
     };
 
+    // @ts-ignore: Something in the build or TS config is preventing TS from recognizing setup(). Doesn't occur in a bare-bones repo.
     const user = userEvent.setup({ document });
+
     const { getByRole } = render(<Hello onClick={fn} />);
     const button = getByRole("button");
     await user.click(button);
