@@ -31,7 +31,7 @@ class JsonHttpClientTest {
     JsonHttpClient jsonHttpClient = JsonHttpClient.createNull();
 
     assertThatThrownBy(() -> {
-      jsonHttpClient.post("/unconfigured", IRRELEVANT_HEADERS, IRRELEVANT_BODY);
+      jsonHttpClient.post("/unconfigured", ExampleResponse.class, IRRELEVANT_HEADERS, IRRELEVANT_BODY);
     }).isInstanceOf(NoSuchElementException.class)
       .hasMessage("URL not configured: /unconfigured");
   }
@@ -58,13 +58,33 @@ class JsonHttpClientTest {
   }
 
   @Test
+  void nulledPostReturnsSingleConfiguredInstanceForever() {
+    ExampleResponse configuredExampleResponse = new ExampleResponse("configured value");
+
+    JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(
+      Map.of("/configured", configuredExampleResponse)
+    );
+
+    ExampleResponse exampleResponse1 = jsonHttpClient.post("/configured", ExampleResponse.class, IRRELEVANT_HEADERS, IRRELEVANT_BODY);
+    assertThat(exampleResponse1.getContent())
+      .isEqualTo("configured value");
+
+    ExampleResponse exampleResponse2 = jsonHttpClient.post("/configured", ExampleResponse.class, IRRELEVANT_HEADERS, IRRELEVANT_BODY);
+    assertThat(exampleResponse2.getContent())
+      .isEqualTo("configured value");
+
+    ExampleResponse exampleResponse3 = jsonHttpClient.post("/configured", ExampleResponse.class, IRRELEVANT_HEADERS, IRRELEVANT_BODY);
+    assertThat(exampleResponse3.getContent())
+      .isEqualTo("configured value");
+  }
+
+  @Test
   void nulledGetReturnsDifferentConfiguredInstancesWhenGivenList() {
     JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(
       Map.of("/configured-list", List.of(
         new ExampleResponse("dto 1"),
         new ExampleResponse("dto 2"),
         new ExampleResponse("dto 3"))));
-
 
     ExampleResponse exampleResponse1 = jsonHttpClient.get("/configured-list",
       ExampleResponse.class);
@@ -83,6 +103,27 @@ class JsonHttpClientTest {
   }
 
   @Test
+  void nulledPostReturnsDifferentConfiguredInstancesWhenGivenList() {
+    JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(
+      Map.of("/configured-list", List.of(
+        new ExampleResponse("dto 1"),
+        new ExampleResponse("dto 2"),
+        new ExampleResponse("dto 3"))));
+
+    ExampleResponse exampleResponse1 = jsonHttpClient.post("/configured-list", ExampleResponse.class, IRRELEVANT_HEADERS, IRRELEVANT_BODY);
+    assertThat(exampleResponse1.getContent())
+      .isEqualTo("dto 1");
+
+    ExampleResponse exampleResponse2 = jsonHttpClient.post("/configured-list", ExampleResponse.class, IRRELEVANT_HEADERS, IRRELEVANT_BODY);
+    assertThat(exampleResponse2.getContent())
+      .isEqualTo("dto 2");
+
+    ExampleResponse exampleResponse3 = jsonHttpClient.post("/configured-list", ExampleResponse.class, IRRELEVANT_HEADERS, IRRELEVANT_BODY);
+    assertThat(exampleResponse3.getContent())
+      .isEqualTo("dto 3");
+  }
+
+  @Test
   void nulledGetThrowsExceptionWhenListOfConfiguredInstancesRunsOut() {
     JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(
       Map.of("/list-of-one?a=b", List.of(new ExampleResponse("dto 1")))
@@ -95,15 +136,23 @@ class JsonHttpClientTest {
   }
 
   @Test
-  void nulledGetReturnsDifferentValuesBasedOnUriAndParameters() {
-    ExampleResponse configuredExampleResponse1A = new ExampleResponse("configured 1a");
-    ExampleResponse configuredExampleResponse1B = new ExampleResponse("configured 1b");
-    ExampleResponse configuredExampleResponse2 = new ExampleResponse("configured 2");
+  void nulledPostThrowsExceptionWhenListOfConfiguredInstancesRunsOut() {
+    JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(
+      Map.of("/list-of-one", List.of(new ExampleResponse("dto 1")))
+    );
+    jsonHttpClient.post("/list-of-one", ExampleResponse.class, IRRELEVANT_HEADERS, IRRELEVANT_BODY);
 
+    assertThatThrownBy(() -> jsonHttpClient.post("/list-of-one", ExampleResponse.class, IRRELEVANT_HEADERS, IRRELEVANT_BODY))
+      .isInstanceOf(NoSuchElementException.class)
+      .hasMessage("No more responses configured for URL: /list-of-one");
+  }
+
+  @Test
+  void nulledGetReturnsDifferentValuesBasedOnUriAndParameters() {
     JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(Map.of(
-      "/configured1?parm=a", configuredExampleResponse1A,
-      "/configured1?parm=b", configuredExampleResponse1B,
-      "/configured2", configuredExampleResponse2)
+      "/configured1?parm=a", new ExampleResponse("configured 1a"),
+      "/configured1?parm=b", new ExampleResponse("configured 1b"),
+      "/configured2", new ExampleResponse("configured 2"))
     );
 
     ExampleResponse exampleResponse1A = jsonHttpClient.get("/configured1?parm={first}",
@@ -124,6 +173,22 @@ class JsonHttpClientTest {
   }
 
   @Test
+  void nulledPostReturnsDifferentValuesBasedOnUri() {
+    JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(Map.of(
+      "/configured1", new ExampleResponse("configured 1"),
+      "/configured2", new ExampleResponse("configured 2"))
+    );
+
+    ExampleResponse exampleResponse1 = jsonHttpClient.post("/configured1", ExampleResponse.class, IRRELEVANT_HEADERS, IRRELEVANT_BODY);
+    assertThat(exampleResponse1.getContent())
+      .isEqualTo("configured 1");
+
+    ExampleResponse exampleResponse2 = jsonHttpClient.post("/configured2", ExampleResponse.class, IRRELEVANT_HEADERS, IRRELEVANT_BODY);
+    assertThat(exampleResponse2.getContent())
+      .isEqualTo("configured 2");
+  }
+
+  @Test
   void getAndPostRequestsAreTracked() {
     JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(
       Map.of(
@@ -138,7 +203,7 @@ class JsonHttpClientTest {
 
     Map<String, String> headers = Map.of("header1", "value1", "header2", "value2");
     ExampleBody postedBody = new ExampleBody("post");
-    jsonHttpClient.post("/post-endpoint", headers, postedBody);
+    jsonHttpClient.post("/post-endpoint", ExampleResponse.class, headers, postedBody);
 
     assertThat(tracker.output())
       .containsExactly(

@@ -18,7 +18,7 @@ public class OpenAiClient {
       "Authorization", "Bearer " + apiKey,
       "Content-Type", "application/json"
     );
-    httpClient.post(OPEN_AI_ENDPOINT, headers, new PromptBody("gpt-3.5-turbo",
+    httpClient.post(OPEN_AI_ENDPOINT, Void.class, headers, new PromptBody("gpt-3.5-turbo",
       List.of(new PromptBody.Message("user", prompt)),
       0.7
     ));

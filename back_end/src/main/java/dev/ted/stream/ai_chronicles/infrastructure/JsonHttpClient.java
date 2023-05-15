@@ -44,16 +44,19 @@ public class JsonHttpClient {
       .getBody();
   }
 
-  public void post(String url, Map<String, String> headers, Object body) {
+  public <R> R post(String url,
+                    Class<R> convertedResponseType,
+                    Map<String, String> headers,
+                    Object body) {
     listener.emit(JsonHttpRequest.createPost(url, headers, body));
     HttpHeaders httpHeaders = new HttpHeaders();
     headers.forEach(httpHeaders::add);
-    restTemplateWrapper.exchange(
+    return restTemplateWrapper.exchange(
       url,
       HttpMethod.POST,
       new HttpEntity<>(body, httpHeaders),
-      Void.class
-    );
+      convertedResponseType
+    ).getBody();
   }
 
   public OutputTracker<JsonHttpRequest> trackRequests() {
@@ -144,9 +147,8 @@ public class JsonHttpClient {
 
     @Override
     public <T> ResponseEntityWrapper<T> exchange(String url, HttpMethod method, HttpEntity<Object> request, Class<T> responseType) {
-      nextResponse(url);
-
-      return null;
+      T response = nextResponse(url);
+      return new StubbedResponseEntity<>(response);
     }
 
     private <T> T nextResponse(String interpolatedUrl) {
