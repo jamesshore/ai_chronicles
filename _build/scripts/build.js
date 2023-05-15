@@ -149,7 +149,7 @@ build.incrementalTask("bundle", paths.bundleDependencies(), async () => {
 const COMPILE_RESULT = {
 	SUCCESS: "success",
 	FAIL: "fail",
-}
+};
 
 build.task("compile", async () => {
 	await build.runTasksAsync([ "copyFrontEndModules" ]);
@@ -178,7 +178,7 @@ build.task("compile", async () => {
 				return COMPILE_RESULT.SUCCESS;
 			}
 			catch (err) {
-				process.stdout.write(`\n${err.message}`);
+				process.stdout.write(`\n-----\n${err.message}\n`);
 				return COMPILE_RESULT.FAIL;
 			}
 		}));
