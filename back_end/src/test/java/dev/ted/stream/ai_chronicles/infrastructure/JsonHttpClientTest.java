@@ -3,6 +3,7 @@ package dev.ted.stream.ai_chronicles.infrastructure;
 import dev.ted.stream.ai_chronicles.OutputTracker;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -12,12 +13,24 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class JsonHttpClientTest {
 
+  public static final Map<String, String> IRRELEVANT_HEADERS = Collections.emptyMap();
+
   @Test
-  void nulledGetThrowsNotFoundExceptionForUnconfiguredEndpoints() {
+  void nulledGetForUnconfiguredEndpointsThrowsNotFoundException() {
     JsonHttpClient jsonHttpClient = JsonHttpClient.createNull();
 
     assertThatThrownBy(() -> {
       jsonHttpClient.get("/unconfigured", ExampleDto.class);
+    }).isInstanceOf(NoSuchElementException.class)
+      .hasMessage("URL not configured: /unconfigured");
+  }
+
+  @Test
+  void nulledPostForUnconfiguredEndpointThrowsNotFoundException() {
+    JsonHttpClient jsonHttpClient = JsonHttpClient.createNull();
+
+    assertThatThrownBy(() -> {
+      jsonHttpClient.post("/unconfigured", IRRELEVANT_HEADERS, ExampleDto.class);
     }).isInstanceOf(NoSuchElementException.class)
       .hasMessage("URL not configured: /unconfigured");
   }
@@ -44,7 +57,7 @@ class JsonHttpClientTest {
   }
 
   @Test
-  void nullGetReturnsDifferentConfiguredInstancesWhenGivenList() {
+  void nulledGetReturnsDifferentConfiguredInstancesWhenGivenList() {
     JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(
       Map.of("/configured-list", List.of(
         new ExampleDto("dto 1"),
@@ -69,7 +82,7 @@ class JsonHttpClientTest {
   }
 
   @Test
-  void nullGetThrowsExceptionWhenListOfConfiguredInstancesRunsOut() {
+  void nulledGetThrowsExceptionWhenListOfConfiguredInstancesRunsOut() {
     JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(
       Map.of("/list-of-one?a=b", List.of(new ExampleDto("dto 1")))
     );
@@ -110,9 +123,12 @@ class JsonHttpClientTest {
   }
 
   @Test
-  void requestsAreTracked() {
+  void getAndPostRequestsAreTracked() {
     JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(
-      Map.of("/get-endpoint?a", new ExampleDto())
+      Map.of(
+        "/get-endpoint?a", new ExampleDto(),
+        "/post-endpoint", new ExampleDto()
+      )
     );
 
     OutputTracker<JsonHttpRequest> tracker = jsonHttpClient.trackRequests();

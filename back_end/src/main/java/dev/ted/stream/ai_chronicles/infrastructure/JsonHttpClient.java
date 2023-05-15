@@ -144,7 +144,8 @@ public class JsonHttpClient {
 
     @Override
     public <T> ResponseEntityWrapper<T> exchange(String url, HttpMethod method, HttpEntity<Object> request, Class<T> responseType) {
-      // no-op
+      nextResponse(url);
+
       return null;
     }
 
