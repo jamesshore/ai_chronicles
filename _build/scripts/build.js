@@ -146,6 +146,11 @@ build.incrementalTask("bundle", paths.bundleDependencies(), async () => {
 	}
 });
 
+const COMPILE_RESULT = {
+	SUCCESS: "success",
+	FAIL: "fail",
+}
+
 build.task("compile", async () => {
 	await build.runTasksAsync([ "copyFrontEndModules" ]);
 
@@ -159,20 +164,26 @@ build.task("compile", async () => {
 	await timeAsync(async () => {
 		process.stdout.write("Compiling JavaScript: ");
 
-		const compiled = await Promise.all(filesToCompile.map(async (file) => {
-			const { code, map } = await swc.transformFile(file, swcConfig);
+		const compileResults = await Promise.all(filesToCompile.map(async (file) => {
+			try {
+				const { code, map } = await swc.transformFile(file, swcConfig);
 
-			const jsFilename = compilerDependencyName(file, ".js");
-			const sourceMapFilename = compilerDependencyName(file, ".js.map");
+				const jsFilename = compilerDependencyName(file, ".js");
+				const sourceMapFilename = compilerDependencyName(file, ".js.map");
 
-			await build.writeDirAndFileAsync(jsFilename, code);
-			await build.writeDirAndFileAsync(sourceMapFilename, map);
+				await build.writeDirAndFileAsync(jsFilename, code);
+				await build.writeDirAndFileAsync(sourceMapFilename, map);
 
-			process.stdout.write(".");
-			return true;
+				process.stdout.write(".");
+				return COMPILE_RESULT.SUCCESS;
+			}
+			catch (err) {
+				process.stdout.write(`\n${err.message}`);
+				return COMPILE_RESULT.FAIL;
+			}
 		}));
-		const failed = !compiled.every(entry => entry === true);
 
+		const failed = compileResults.some(entry => entry === COMPILE_RESULT.FAIL);
 		if (failed) throw new Error("Compile failed");
 	});
 
