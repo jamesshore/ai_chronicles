@@ -1,5 +1,4 @@
-{
-  "exclude": "\/node_modules\/",
+export default {
   "jsc": {
     "parser": {
       "syntax": "typescript",
@@ -20,4 +19,4 @@
   },
   "sourceMaps": true,
   "isModule": true
-}
+};

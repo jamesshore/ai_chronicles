@@ -10,6 +10,9 @@ import * as colors from "../util/colors.js";
 import * as sh from "../util/sh.js";
 import childProcess from "node:child_process";
 import { pathToFile } from "../util/module_paths.js";
+import swc from "@swc/core";
+import lintConfig from "../config/eslint.conf.js";
+import swcConfig from "../config/swc.conf.js";
 
 shell.config.fatal = true;
 
@@ -114,7 +117,7 @@ build.task("test", async () => {
 
 });
 
-build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
+build.incrementalTask("bundle", paths.bundleDependencies(), async () => {
 	await build.runTasksAsync([ "compile" ]);
 
 	await timeAsync(async () => {
@@ -143,20 +146,52 @@ build.incrementalTask("bundle", paths.compilerDependencies(), async () => {
 	}
 });
 
-build.incrementalTask("compile", paths.compilerDependencies(), async () => {
+const COMPILE_RESULT = {
+	SUCCESS: "success",
+	FAIL: "fail",
+};
+
+build.task("compile", async () => {
 	await build.runTasksAsync([ "copyFrontEndModules" ]);
+
+	const modifiedFiles = await Promise.all(paths.compilerDependencies().map(async (file) => {
+		const modified = await build.isModifiedAsync(file, compilerDependencyName(file, ".js"));
+		return modified ? file : null;
+	}));
+	const filesToCompile = modifiedFiles.filter(file => file !== null);
+	if (filesToCompile.length === 0) return;
 
 	await timeAsync(async () => {
 		process.stdout.write("Compiling JavaScript: ");
-		const { code } = await sh.runInteractiveAsync(paths.swc, [
-			"--config-file", `${paths.configDir}/swc.conf.json`,
-			"--out-dir", paths.typescriptDir,
-			"--quiet",
-			paths.frontEndSrcDir
-		]);
-		if (code !== 0) throw new Error("Compile failed");
-		process.stdout.write(".");
+
+		const compileResults = await Promise.all(filesToCompile.map(async (file) => {
+			try {
+				const { code, map } = await swc.transformFile(file, swcConfig);
+
+				const jsFilename = compilerDependencyName(file, ".js");
+				const sourceMapFilename = compilerDependencyName(file, ".js.map");
+
+				await build.writeDirAndFileAsync(jsFilename, code);
+				await build.writeDirAndFileAsync(sourceMapFilename, map);
+
+				process.stdout.write(".");
+				return COMPILE_RESULT.SUCCESS;
+			}
+			catch (err) {
+				process.stdout.write(`\n-----\n${err.message}\n`);
+				return COMPILE_RESULT.FAIL;
+			}
+		}));
+
+		const failed = compileResults.some(entry => entry === COMPILE_RESULT.FAIL);
+		if (failed) throw new Error("Compile failed");
 	});
+
+	function compilerDependencyName(filename, extension) {
+		const parsedFilename = pathLib.parse(filename);
+		const jsFilename = `${parsedFilename.dir}/${parsedFilename.name}${extension}`;
+		return `${paths.typescriptDir}/${build.rootRelativePath(paths.rootDir, jsFilename)}`;
+	}
 });
 
 build.incrementalTask("copyFrontEndModules", [ paths.frontEndPackageJson ], async () => {
