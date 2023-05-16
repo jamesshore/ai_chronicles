@@ -4,12 +4,61 @@ import parseArgs from "minimist";
 import pathLib from "node:path";
 import fs from "fs";
 import { promisify } from "util";
+import * as colors from "./colors.js";
 
 const statAsync = promisify(fs.stat);
 const writeFileAsync = promisify(fs.writeFile);
 const mkdirAsync = promisify(fs.mkdir);
 
-export default class Build {
+const timingColor = colors.white;
+
+export async function timeAsync(fnAsync) {
+	const start = Date.now();
+	const result = await fnAsync();
+	const elapsedTime = ((Date.now() - start) / 1000).toFixed(2);
+	process.stdout.write(timingColor(` (${elapsedTime}s)\n`));
+
+	return result;
+}
+
+export async function isAnyModifiedAsync(sources, target) {
+	const modifiedPromises = sources.map((source) => isModifiedAsync(source, target));
+	const modifiedResults = await Promise.all(modifiedPromises);
+	return modifiedResults.some((success) => success === true);
+}
+
+export async function isModifiedAsync(source, target) {
+	try {
+		const [sourceStats, targetStats] = await Promise.all([statAsync(source), statAsync(target)]);
+		return sourceStats.mtime > targetStats.mtime;
+	}
+	catch(err) {
+		if (err.code === "ENOENT") return true;
+		else throw err;
+	}
+}
+
+export async function isNewerThanAsync(file, timestamp) {
+	const fileStats = await statAsync(file);
+	return fileStats.mtime > timestamp;
+}
+
+export async function readFileAsync(file) {
+	const fileContents = await (promisify(fs.readFile))(file);
+	return fileContents.toString();
+}
+
+export async function writeDirAndFileAsync(file, contents) {
+	const dir = pathLib.dirname(file);
+	await mkdirAsync(dir, { recursive: true });
+	await writeFileAsync(file, contents);
+}
+
+export function rootRelativePath(rootDir, fullyQualifiedFilename) {
+	return fullyQualifiedFilename.replace(`${rootDir}/`, "");
+}
+
+export class Build {
 
 	constructor({ incrementalDir }) {
 		this._taskFns = {};
@@ -55,48 +104,11 @@ export default class Build {
 	incrementalTask(taskName, sourceFiles, fn) {
 		this.task(taskName, async () => {
 			const taskFile = `${this._incrementalDir}${taskName}.task`;
-			if (!(await this.isAnyModifiedAsync(sourceFiles, taskFile))) return;
+			if (!(await isAnyModifiedAsync(sourceFiles, taskFile))) return;
 
 			await fn();
 			await this.writeDirAndFileAsync(taskFile, "ok");
 		});
-	}
-
-	async isAnyModifiedAsync(sources, target) {
-		const modifiedPromises = sources.map((source) => this.isModifiedAsync(source, target));
-		const modifiedResults = await Promise.all(modifiedPromises);
-		return modifiedResults.some((success) => success === true);
-	}
-
-	async isModifiedAsync(source, target) {
-		try {
-			const [sourceStats, targetStats] = await Promise.all([statAsync(source), statAsync(target)]);
-			return sourceStats.mtime > targetStats.mtime;
-		}
-		catch(err) {
-			if (err.code === "ENOENT") return true;
-			else throw err;
-		}
-	}
-
-	async isNewerThanAsync(file, timestamp) {
-		const fileStats = await statAsync(file);
-		return fileStats.mtime > timestamp;
-	}
-
-	async readFileAsync(file) {
-		const fileContents = await (promisify(fs.readFile))(file);
-		return fileContents.toString();
-	}
-
-	async writeDirAndFileAsync(file, contents) {
-		const dir = pathLib.dirname(file);
-		await mkdirAsync(dir, { recursive: true });
-		await writeFileAsync(file, contents);
-	}
-
-	rootRelativePath(rootDir, fullyQualifiedFilename) {
-		return fullyQualifiedFilename.replace(`${rootDir}/`, "");
 	}
 
 }
