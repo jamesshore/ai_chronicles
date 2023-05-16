@@ -60,6 +60,13 @@ export default test(({ it }) => {
 		assert.match(output[1], /97m_test_runner\.test\.failure_helper\.js/);
 	});
 
+	it("allows filename to be overridden", async () => {
+		const { runner, output } = createRunner();
+
+		await runner.testFilesAsync([ FAILURE_FILE ], [ "my_reported_filename.js"]);
+		assert.match(output[1], /97mmy_reported_filename.js/);
+	});
+
 	it("fails gracefully if module fails to require()", async () => {
 		const { runner, output } = createRunner();
 
