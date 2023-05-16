@@ -25,6 +25,7 @@
     "rollup": "^3.21.2",
     "shelljs": "^0.8.5",
     "sound-play": "^1.1.0",
+    "source-map-support": "^0.5.21",
     "typescript": "^5.0.4"
   },
   "author": "James Shore <jshore@jamesshore.com>",
