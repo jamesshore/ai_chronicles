@@ -1,7 +1,9 @@
 // Copyright Titanium I.T. LLC.
 import * as colors from "../util/colors.js";
 import { TestRunner } from "../util/tests/test_runner.js";
-import path from "node:path";
+import sourceMapSupport from "source-map-support";
+
+sourceMapSupport.install();   // automatically apply source maps to stack traces
 
 const failColor = colors.red;
 const timeoutColor = colors.purple;

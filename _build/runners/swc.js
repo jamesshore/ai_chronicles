@@ -17,8 +17,9 @@ export async function runAsync(files, header) {
     const compileResults = await Promise.all(files.map(async ({ sourceFile, compiledFile, sourceMapFile }) => {
       try {
         const { code, map } = await swc.transformFile(sourceFile, swcConfig);
+        const sourceMapLink = `\n//# sourceMappingURL=${sourceMapFile}\n`;
 
-        await writeDirAndFileAsync(compiledFile, code);
+        await writeDirAndFileAsync(compiledFile, code + sourceMapLink);
         await writeDirAndFileAsync(sourceMapFile, map);
 
         process.stdout.write(".");
