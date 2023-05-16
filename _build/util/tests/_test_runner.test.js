@@ -8,47 +8,56 @@ import { TestResult } from "./test_result.js";
 /* dependency: ./_test_runner.test.no_module_helper.js */
 /* dependency: ./_test_runner.test.bad_module_helper.js */
 
-import PASS_MODULE from "./_test_runner.test.success_helper.js";
+const SUCCESS_FILE = "./_test_runner.test.success_helper.js";
+import SUCCESS_MODULE from "./_test_runner.test.success_helper.js";
+const SUCCESS_PROGRESS = TestResult.pass("irrelevant name").renderProgress();
 
-const IRRELEVANT_NAME = "irrelevant name";
-const PASS_PROGRESS = TestResult.pass("irrelevant name").renderProgress();
+const FAILURE_FILE = "./_test_runner.test.failure_helper.js";
 
 export default test(({ it }) => {
 
 	it("renders progress", async () => {
 		const { runner, output } = createRunner();
 
-		await runner.testModuleAsync(testSuite.suite([PASS_MODULE, PASS_MODULE]));
-		assert.deepEqual(output, [ PASS_PROGRESS, PASS_PROGRESS ]);
+		await runner.testModuleAsync(testSuite.suite([SUCCESS_MODULE, SUCCESS_MODULE]));
+		assert.deepEqual(output, [ SUCCESS_PROGRESS, SUCCESS_PROGRESS ]);
 	});
 
 	it("requires files", async () => {
 		const { runner, output } = createRunner();
 
-		await runner.testFilesAsync([ "./_test_runner.test.success_helper.js" ]);
-		assert.deepEqual(output, [ PASS_PROGRESS ]);
+		await runner.testFilesAsync([ SUCCESS_FILE ]);
+		assert.deepEqual(output, [ SUCCESS_PROGRESS ]);
 	});
 
 	it("returns test counts", async () => {
 		const { runner } = createRunner();
 
 		assert.deepEqual(
-			await runner.testFilesAsync([ "./_test_runner.test.success_helper.js" ]),
-			(await PASS_MODULE.runAsync()).summary(),
+			await runner.testFilesAsync([ SUCCESS_FILE ]),
+			(await SUCCESS_MODULE.runAsync()).summary(),
 		);
 	});
 
 	it("outputs failure report", async () => {
 		const { runner, output } = createRunner();
 
-		const module = createModule(({ it }) => {
-			it(IRRELEVANT_NAME, () => {
-				throw new Error("my error");
-			});
-		});
+		await runner.testFilesAsync([ FAILURE_FILE ]);
+		assert.match(output[1], /my failure/);
+	});
 
-		await runner.testModuleAsync(module);
-		assert.match(output[1], /my error/);
+	it("outputs failure report", async () => {
+		const { runner, output } = createRunner();
+
+		await runner.testFilesAsync([ FAILURE_FILE ]);
+		assert.match(output[1], /my failure/);
+	});
+
+	it("sets filename", async () => {
+		const { runner, output } = createRunner();
+
+		await runner.testFilesAsync([ FAILURE_FILE ]);
+		assert.match(output[1], /97m_test_runner\.test\.failure_helper\.js/);
 	});
 
 	it("fails gracefully if module fails to require()", async () => {
