@@ -124,7 +124,7 @@ class TestSuiteResult {
 				count[SKIP] += subCount[SKIP];
 				count[TIMEOUT] += subCount[TIMEOUT];
 				count.total += subCount.total;
-				count.successFiles = [ ...count.successFiles, ...subCount.successFiles ];
+				count.successFiles = union(count.successFiles, subCount.successFiles);
 			}
 			else {
 				count[result.status]++;
@@ -135,7 +135,14 @@ class TestSuiteResult {
 		count.success = this.isSuccess();
 		if (this.isPassed() && this.filename !== undefined) count.successFiles = [ this.filename, ...count.successFiles ];
 		return count;
+
+		function union(array1, array2) {
+			const combinedArrays = [ ...array1, ...array2 ];
+			const deduplicatedSet = new Set(combinedArrays);
+			return [...deduplicatedSet];
+		}
 	}
+
 
 	equals(that) {
 		if (this.suite.length !== that.suite.length) return false;

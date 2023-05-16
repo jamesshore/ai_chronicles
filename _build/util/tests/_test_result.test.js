@@ -168,6 +168,17 @@ export default test(({ describe }) => {
 				assert.deepEqual(suite.summary().successFiles, [ "file2" ]);
 			});
 
+			it("does not include filenames more than once", () => {
+				const suite = createSuite({ results: [
+					createSuite({ filename: "my_file", results: [
+						createSuite({ results: [
+							createPass(),
+						]}),
+					]}),
+				]});
+				assert.deepEqual(suite.summary().successFiles, [ "my_file" ]);
+			});
+
 		});
 
 	});
