@@ -1,6 +1,5 @@
 // Copyright Titanium I.T. LLC.
-
-import pathLib from "node:path";
+import { readFileAsync, isModifiedAsync, isNewerThanAsync } from "./build_lib.js";
 
 // Matches 'import ... from "file"' and 'export ... from "file"', and detects if it has '//' in front.
 const IMPORT_REGEX = /(\/\/)?.*?\b(?:import|export) .*? from\s*?["'](.*?)["']/;
@@ -19,7 +18,7 @@ export default class DependencyAnalysis {
 	async isDependencyModifiedAsync(file, fileToCompareAgainst) {
 		const allDependencies = await this._getAllDependenciesAsync(file);
 		const isNewer = await Promise.all(allDependencies.map(async (dependency) => {
-			return await this._build.isModifiedAsync(dependency, fileToCompareAgainst);
+			return await isModifiedAsync(dependency, fileToCompareAgainst);
 		}));
 		return isNewer.some((dependencyIsNewer) => dependencyIsNewer);
 	}
@@ -47,7 +46,7 @@ export default class DependencyAnalysis {
 async function isCachedAnalysisOutdated(self, file) {
 	const analysis = await self._analysisCache[file];
 	if (analysis === undefined) return true;
-	return await self._build.isNewerThanAsync(file, analysis.analyzedAt);
+	return await isNewerThanAsync(file, analysis.analyzedAt);
 
 }
 
@@ -66,7 +65,7 @@ async function getAnalysisAsync(self, file) {
 
 async function performAnalysisAsync(self, file) {
 	const analyzedAt = Date.now();
-	const fileContents = await self._build.readFileAsync(file);
+	const fileContents = await readFileAsync(file);
 	return {
 		analyzedAt,
 		dependencies: await findDependenciesAsync(self, file, fileContents),

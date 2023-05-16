@@ -13,20 +13,21 @@ export class TestRunner {
 		this._output = output;
 	}
 
-	async testFilesAsync(files) {
-		const suitePromises = files.map(async (filename) => {
+	async testFilesAsync(files, reportedFilenames = []) {
+		const suitePromises = files.map(async (filename, i) => {
+			const reportedFilename = reportedFilenames[i] ?? filename;
 			try {
 				const suite = (await import(filename)).default;
 				if (suite?.runAsync === undefined) {
-					return fail(path.basename(filename), `doesn't export a test suite: ${filename}:1`);
+					return fail(path.basename(filename), `doesn't export a test suite: ${reportedFilename}:1`);
 				}
 				else {
-					suite.filename = filename;
+					suite.filename = reportedFilename;
 					return suite;
 				}
 			}
 			catch(err) {
-				return fail(`error when requiring ${path.basename(filename)}`, err);
+				return fail(`error when requiring ${path.basename(reportedFilename)}`, err);
 			}
 		});
 

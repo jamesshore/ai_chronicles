@@ -1,6 +1,5 @@
 // Copyright Titanium I.T. LLC.
-
-import Build from "../util/build_lib.js";
+import { Build, timeAsync, isModifiedAsync, rootRelativePath, writeDirAndFileAsync } from "../util/build_lib.js";
 import DependencyAnalysis from "../util/dependency_analysis.js";
 import * as pathLib from "node:path";
 import * as paths from "../config/paths.js";
@@ -10,15 +9,12 @@ import * as colors from "../util/colors.js";
 import * as sh from "../util/sh.js";
 import childProcess from "node:child_process";
 import { pathToFile } from "../util/module_paths.js";
-import swc from "@swc/core";
-import lintConfig from "../config/eslint.conf.js";
-import swcConfig from "../config/swc.conf.js";
+import * as swc from "../runners/swc.js";
 
 shell.config.fatal = true;
 
 const successColor = colors.brightGreen;
 const failureColor = colors.brightRed;
-const timingColor = colors.white;
 
 const build = new Build({ incrementalDir: `${paths.incrementalDir}/tasks/` });
 
@@ -52,7 +48,7 @@ build.task("clean", async () => {
 
 build.task("lint", async () => {
 	const modifiedFiles = await Promise.all(paths.lintFiles().map(async (file) => {
-		const modified = await build.isModifiedAsync(file, lintDependencyName(file));
+		const modified = await isModifiedAsync(file, lintDependencyName(file));
 		return modified ? file : null;
 	}));
 	const filesToLint = modifiedFiles.filter(file => file !== null);
@@ -63,7 +59,7 @@ build.task("lint", async () => {
 	});
 
 	await Promise.all(passFiles.map(async (file) => {
-		build.writeDirAndFileAsync(lintDependencyName(file), "lint ok");
+		writeDirAndFileAsync(lintDependencyName(file), "lint ok");
 	}));
 	if (failed) throw new Error("Lint failed");
 
@@ -108,7 +104,7 @@ build.task("test", async () => {
 	if (failed) throw new Error("Tests failed");
 
 	await Promise.all(passFiles.map(async (file) => {
-		await build.writeDirAndFileAsync(testDependencyName(file), "test ok");
+		await writeDirAndFileAsync(testDependencyName(file), "test ok");
 	}));
 
 	function testDependencyName(filename) {
@@ -137,7 +133,7 @@ build.incrementalTask("bundle", paths.bundleDependencies(), async () => {
 
 	function copyFrontEndFiles() {
 		paths.frontEndStaticFiles().forEach(file => {
-			const relativePath = build.rootRelativePath(paths.frontEndSrcDir, file);
+			const relativePath = rootRelativePath(paths.frontEndSrcDir, file);
 			const destFile = `${paths.bundleDir}/${relativePath}`;
 			shell.mkdir("-p", pathLib.dirname(destFile));
 			shell.cp(file, destFile);
@@ -146,51 +142,28 @@ build.incrementalTask("bundle", paths.bundleDependencies(), async () => {
 	}
 });
 
-const COMPILE_RESULT = {
-	SUCCESS: "success",
-	FAIL: "fail",
-};
-
 build.task("compile", async () => {
 	await build.runTasksAsync([ "copyFrontEndModules" ]);
 
-	const modifiedFiles = await Promise.all(paths.compilerDependencies().map(async (file) => {
-		const modified = await build.isModifiedAsync(file, compilerDependencyName(file, ".js"));
-		return modified ? file : null;
-	}));
-	const filesToCompile = modifiedFiles.filter(file => file !== null);
-	if (filesToCompile.length === 0) return;
+	const files = (await Promise.all(paths.compilerDependencies().map(async (sourceFile) => {
+		const compiledFile = compilerDependencyName(sourceFile, ".js");
+		const sourceMapFile = compilerDependencyName(sourceFile, ".js.map");
 
-	await timeAsync(async () => {
-		process.stdout.write("Compiling JavaScript: ");
+		const isModified = await isModifiedAsync(sourceFile, compiledFile);
+		if (!isModified) return null;
 
-		const compileResults = await Promise.all(filesToCompile.map(async (file) => {
-			try {
-				const { code, map } = await swc.transformFile(file, swcConfig);
+		return { sourceFile, compiledFile, sourceMapFile };
+	}))).filter(file => file !== null);
 
-				const jsFilename = compilerDependencyName(file, ".js");
-				const sourceMapFilename = compilerDependencyName(file, ".js.map");
+	const header = "Compiling JavaScript";
+	const { failed } = await swc.runAsync(files, header);
 
-				await build.writeDirAndFileAsync(jsFilename, code);
-				await build.writeDirAndFileAsync(sourceMapFilename, map);
-
-				process.stdout.write(".");
-				return COMPILE_RESULT.SUCCESS;
-			}
-			catch (err) {
-				process.stdout.write(`\n-----\n${err.message}\n`);
-				return COMPILE_RESULT.FAIL;
-			}
-		}));
-
-		const failed = compileResults.some(entry => entry === COMPILE_RESULT.FAIL);
-		if (failed) throw new Error("Compile failed");
-	});
+	if (failed) throw new Error("Compile failed");
 
 	function compilerDependencyName(filename, extension) {
 		const parsedFilename = pathLib.parse(filename);
 		const jsFilename = `${parsedFilename.dir}/${parsedFilename.name}${extension}`;
-		return `${paths.typescriptDir}/${build.rootRelativePath(paths.rootDir, jsFilename)}`;
+		return `${paths.typescriptDir}/${rootRelativePath(paths.rootDir, jsFilename)}`;
 	}
 });
 
@@ -214,12 +187,5 @@ build.incrementalTask("typecheck", paths.compilerDependencies(), async () => {
 });
 
 function dependencyName(filename, extension) {
-	return `${paths.incrementalDir}/files/${build.rootRelativePath(paths.rootDir, filename)}.${extension}`;
-}
-
-async function timeAsync(fnAsync) {
-	const start = Date.now();
-	await fnAsync();
-	const elapsedTime = ((Date.now() - start) / 1000).toFixed(2);
-	process.stdout.write(timingColor(` (${elapsedTime}s)\n`));
+	return `${paths.incrementalDir}/files/${rootRelativePath(paths.rootDir, filename)}.${extension}`;
 }

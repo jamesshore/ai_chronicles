@@ -1,7 +1,10 @@
 // Copyright Titanium I.T. LLC.
 import * as colors from "../util/colors.js";
 import { TestRunner } from "../util/tests/test_runner.js";
-import path from "node:path";
+import sourceMapSupport from "source-map-support";
+import { readFileAsync } from "../util/build_lib.js";
+
+sourceMapSupport.install();   // automatically apply source maps to stack traces
 
 const failColor = colors.red;
 const timeoutColor = colors.purple;
@@ -21,7 +24,9 @@ export async function runAsync({ header = "Testing", files = [] }) {
 
   process.stdout.write(`${header}: `);
   const startTime = Date.now();
-  const testSummary = await TestRunner.create().testFilesAsync(files);
+  const originalFilesToTestFilesMap = await mapFilesToOriginals(files);
+
+  const testSummary = await TestRunner.create().testFilesAsync(files, Object.keys(originalFilesToTestFilesMap));
   if (testSummary.total === 0) {
     process.stdout.write("\n");
     throw new Error("No tests found");
@@ -31,7 +36,7 @@ export async function runAsync({ header = "Testing", files = [] }) {
 
   return {
     failed: !testSummary.success,
-    passFiles: testSummary.successFiles,
+    passFiles: testSummary.successFiles.map(file => originalFilesToTestFilesMap[file]),
   };
 }
 
@@ -60,4 +65,24 @@ function renderCount(number, description, color) {
   } else {
     return color(`${number} ${description}; `);
   }
+}
+
+async function mapFilesToOriginals(files) {
+  const entries = await Promise.all(files.map(async (file) => {
+    const sourceMapFilename = `${file}.map`;
+    let sourceMap;
+    try {
+      sourceMap = JSON.parse(await readFileAsync(sourceMapFilename));
+    } catch (err) {
+      return [ file, file ];
+    }
+    const sourcesLength = sourceMap.sources?.length;
+    if (sourcesLength !== 1) {
+      throw new Error(`Source map '${sourceMapFilename}:1' should have one 'sources' entry, but it was ${sourcesLength}`);
+    }
+
+    return [ sourceMap.sources[0], file ];
+  }));
+
+  return Object.fromEntries(entries);
 }
