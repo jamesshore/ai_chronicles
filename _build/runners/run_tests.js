@@ -2,6 +2,7 @@
 import * as colors from "../util/colors.js";
 import { TestRunner } from "../util/tests/test_runner.js";
 import sourceMapSupport from "source-map-support";
+import { readFileAsync } from "../util/build_lib.js";
 
 sourceMapSupport.install();   // automatically apply source maps to stack traces
 
@@ -23,7 +24,9 @@ export async function runAsync({ header = "Testing", files = [] }) {
 
   process.stdout.write(`${header}: `);
   const startTime = Date.now();
-  const testSummary = await TestRunner.create().testFilesAsync(files);
+  const originalFilenames = await determineOriginalFilenamesFromSourceMap(files);
+
+  const testSummary = await TestRunner.create().testFilesAsync(files, originalFilenames);
   if (testSummary.total === 0) {
     process.stdout.write("\n");
     throw new Error("No tests found");
@@ -62,4 +65,22 @@ function renderCount(number, description, color) {
   } else {
     return color(`${number} ${description}; `);
   }
+}
+
+async function determineOriginalFilenamesFromSourceMap(files) {
+  return await Promise.all(files.map(async (file) => {
+    const sourceMapFilename = `${file}.map`;
+    let sourceMap;
+    try {
+      sourceMap = JSON.parse(await readFileAsync(sourceMapFilename));
+    } catch (err) {
+      return file;
+    }
+    const sourcesLength = sourceMap.sources?.length;
+    if (sourcesLength !== 1) {
+      throw new Error(`Source map '${sourceMapFilename}:1' should have one 'sources' entry, but it was ${sourcesLength}`);
+    }
+
+    return sourceMap.sources[0];
+  }));
 }
