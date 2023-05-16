@@ -4,6 +4,20 @@ import { TestRunner } from "../util/tests/test_runner.js";
 import sourceMapSupport from "source-map-support";
 import { readFileAsync } from "../util/build_lib.js";
 
+/* source-map-support issue: it causes massive performance degradation. JDLS 16 May 2023
+ *
+ * Source-map-support hooks into the V8 engine to apply source maps to stack traces.
+ * But it causes noticeable pauses during the test run. As of this commit, with source-
+ * map-support disabled, running `./build.sh clean test` takes 0.43s to run 265 tests.
+ * With it enabled, it takes 1.35s (!!!) with two very noticeable pauses in the middle.
+ * It also caused a ~0.60s delay when displaying a test failure in _hello.test.tsx,
+ * presumably due to translating the stack trace displayed in the failure message.
+ *
+ * I'm not sure why source-map-support's performance is so bad. Possibly due to it needing
+ * to synchronously read files looking for source maps whenever an exception is thrown?
+ * The problems should go away if we manually translate stack traces only when failures
+ * occur. We can use Mozilla's source-map library to do that.
+ */
 sourceMapSupport.install();   // automatically apply source maps to stack traces
 
 const failColor = colors.red;
