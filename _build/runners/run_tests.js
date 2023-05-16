@@ -24,9 +24,9 @@ export async function runAsync({ header = "Testing", files = [] }) {
 
   process.stdout.write(`${header}: `);
   const startTime = Date.now();
-  const originalFilenames = await determineOriginalFilenamesFromSourceMap(files);
+  const originalFilesToTestFilesMap = await mapFilesToOriginals(files);
 
-  const testSummary = await TestRunner.create().testFilesAsync(files, originalFilenames);
+  const testSummary = await TestRunner.create().testFilesAsync(files, Object.keys(originalFilesToTestFilesMap));
   if (testSummary.total === 0) {
     process.stdout.write("\n");
     throw new Error("No tests found");
@@ -36,7 +36,7 @@ export async function runAsync({ header = "Testing", files = [] }) {
 
   return {
     failed: !testSummary.success,
-    passFiles: testSummary.successFiles,
+    passFiles: testSummary.successFiles.map(file => originalFilesToTestFilesMap[file]),
   };
 }
 
@@ -67,20 +67,22 @@ function renderCount(number, description, color) {
   }
 }
 
-async function determineOriginalFilenamesFromSourceMap(files) {
-  return await Promise.all(files.map(async (file) => {
+async function mapFilesToOriginals(files) {
+  const entries = await Promise.all(files.map(async (file) => {
     const sourceMapFilename = `${file}.map`;
     let sourceMap;
     try {
       sourceMap = JSON.parse(await readFileAsync(sourceMapFilename));
     } catch (err) {
-      return file;
+      return [ file, file ];
     }
     const sourcesLength = sourceMap.sources?.length;
     if (sourcesLength !== 1) {
       throw new Error(`Source map '${sourceMapFilename}:1' should have one 'sources' entry, but it was ${sourcesLength}`);
     }
 
-    return sourceMap.sources[0];
+    return [ sourceMap.sources[0], file ];
   }));
+
+  return Object.fromEntries(entries);
 }
