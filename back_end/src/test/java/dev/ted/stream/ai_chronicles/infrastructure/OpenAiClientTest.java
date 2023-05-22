@@ -1,5 +1,7 @@
 package dev.ted.stream.ai_chronicles.infrastructure;
 
+import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -85,6 +87,7 @@ class OpenAiClientTest {
   }
 
   @Test
+  @Disabled
   void deleteMe_manual_test() {
     String API_KEY = "";
     String PROMPT = "Pretend you have crashed on a planet populated by robots. What is the first thing you say?";

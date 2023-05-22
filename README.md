@@ -63,3 +63,4 @@ Non-goals:
 * ➡️ OpenAI Wrapper that talks to real Open AI
 * ➡️ Manual test of communication
 * Nullable OpenAI Wrapper
+* Move manual back-end test
