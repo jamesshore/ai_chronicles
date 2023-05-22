@@ -46,8 +46,8 @@ Non-goals:
 
 ## User Stories
 
-* ➡️ Placeholder communication with OpenAI
-* Placeholder web page
+* ✅Placeholder communication with OpenAI
+* ➡️Placeholder web page
 * Conversation with OpenAI via front-end
 * Harden communication with OpenAI (OpenAiClient error handling)
   * What if response doesn't have all the fields?
@@ -59,8 +59,7 @@ Non-goals:
 
 ## Engineering Tasks
 
-* ✅ Reuse HttpClient wrapper that communicates via HTTP(S)
-* ➡️ OpenAI Wrapper that talks to real Open AI
-* ➡️ Manual test of communication
-* Nullable OpenAI Wrapper
+* ✅️Hardcode the UI mockup
+* Remove <Hello> component
+* Change HTTP tests to test against JSON rather than DTO
 * Move manual back-end test
