@@ -1,6 +1,7 @@
 package dev.ted.stream.ai_chronicles.infrastructure;
 
 import dev.ted.stream.ai_chronicles.OutputTracker;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -18,6 +19,9 @@ class JsonHttpClientTest {
 
   @Test
   void nulledGetForUnconfiguredEndpointsThrowsNotFoundException() {
+    // Although Nullables typically have a useful default, that's not possible
+    // for JsonHttpClient because the response is always context-specific.
+
     JsonHttpClient jsonHttpClient = JsonHttpClient.createNull();
 
     assertThatThrownBy(() -> {
@@ -28,6 +32,9 @@ class JsonHttpClientTest {
 
   @Test
   void nulledPostForUnconfiguredEndpointThrowsNotFoundException() {
+    // Although Nullables typically have a useful default, that's not possible
+    // for JsonHttpClient because the response is always context-specific.
+
     JsonHttpClient jsonHttpClient = JsonHttpClient.createNull();
 
     assertThatThrownBy(() -> {
@@ -145,6 +152,36 @@ class JsonHttpClientTest {
     assertThatThrownBy(() -> jsonHttpClient.post("/list-of-one", ExampleResponse.class, IRRELEVANT_HEADERS, IRRELEVANT_BODY))
       .isInstanceOf(NoSuchElementException.class)
       .hasMessage("No more responses configured for URL: /list-of-one");
+  }
+
+  @Test
+  void nulledGetFailsFastWhenConfiguredResponseDoesntMatchExpectedResponseType() {
+    JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(
+      Map.of("/endpoint", "incorrect_configured_response")
+    );
+
+    assertThatThrownBy(() -> {
+      var response = jsonHttpClient.get("/endpoint", ExampleResponse.class);
+    })
+      .isInstanceOf(ClassCastException.class)
+      .hasMessage("URL /endpoint was configured to return an instance of\n" +
+        "  class java.lang.String\n" +
+        "but the request said the response should be cast to\n" +
+        "  class dev.ted.stream.ai_chronicles.infrastructure.JsonHttpClientTest$ExampleResponse");
+  }
+
+  @Test
+  void nulledPostFailsFastWhenConfiguredResponseDoesntMatchExpectedResponseType() {
+    JsonHttpClient jsonHttpClient = JsonHttpClient.createNull(
+      Map.of("/endpoint", "incorrect_configured_response")
+    );
+
+    assertThatThrownBy(() -> jsonHttpClient.post("/endpoint", ExampleResponse.class, Collections.emptyMap(), null))
+      .isInstanceOf(ClassCastException.class)
+      .hasMessage("URL /endpoint was configured to return an instance of\n" +
+        "  class java.lang.String\n" +
+        "but the request said the response should be cast to\n" +
+        "  class dev.ted.stream.ai_chronicles.infrastructure.JsonHttpClientTest$ExampleResponse");
   }
 
   @Test

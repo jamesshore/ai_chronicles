@@ -49,12 +49,18 @@ Non-goals:
 * ➡️ Placeholder communication with OpenAI
 * Placeholder web page
 * Conversation with OpenAI via front-end
+* Harden communication with OpenAI (OpenAiClient error handling)
+  * What if response doesn't have all the fields?
+  * What if OpenAI doesn't like the API key?
+  * What about rate limiting?
+  * or throws some other error / unexpected status?
 * (Future: tbd)
 
 
 ## Engineering Tasks
 
+* ✅ Reuse HttpClient wrapper that communicates via HTTP(S)
 * ➡️ OpenAI Wrapper that talks to real Open AI
+* ➡️ Manual test of communication
 * Nullable OpenAI Wrapper
-* Reuse HttpClient wrapper that communicates via HTTP(S)
-* Manual test of communication
+* Move manual back-end test

@@ -140,29 +140,47 @@ public class JsonHttpClient {
                                                      Class<T> responseType,
                                                      Object... uriVariables) {
       String interpolatedUrl = interpolateUrl(url, uriVariables);
-
-      T response = nextResponse(interpolatedUrl);
+      T response = nextResponse(interpolatedUrl, responseType);
       return new StubbedResponseEntity<>(response);
     }
 
     @Override
     public <T> ResponseEntityWrapper<T> exchange(String url, HttpMethod method, HttpEntity<Object> request, Class<T> responseType) {
-      T response = nextResponse(url);
+      T response = nextResponse(url, responseType);
       return new StubbedResponseEntity<>(response);
     }
 
-    private <T> T nextResponse(String interpolatedUrl) {
-      if (!endpointsResponses.containsKey(interpolatedUrl)) {
-        throw new NoSuchElementException("URL not configured: " + interpolatedUrl);
-      }
+    private <T> T nextResponse(String interpolatedUrl, Class<T> responseType) {
+      requireConfiguredResponseFor(interpolatedUrl);
 
       @SuppressWarnings("unchecked")
-      Iterator<T> response = (Iterator<T>) endpointsResponses.get(interpolatedUrl);
-      if (!response.hasNext()) {
+      Iterator<T> responses = (Iterator<T>) endpointsResponses.get(interpolatedUrl);
+      requireConfiguredResponsesAvailable(interpolatedUrl, responses);
+
+      T response = responses.next();
+      requireCorrectResponseType(interpolatedUrl, responseType, response);
+      return response;
+    }
+
+    private static <T> void requireCorrectResponseType(String interpolatedUrl, Class<T> responseType, T response) {
+      if (!response.getClass().equals(responseType)) {
+        throw new ClassCastException("URL " + interpolatedUrl
+          + " was configured to return an instance of\n  " + response.getClass() + "\n"
+          + "but the request said the response should be cast to\n  " + responseType);
+      }
+    }
+
+    private static <T> void requireConfiguredResponsesAvailable(String interpolatedUrl, Iterator<T> responses) {
+      if (!responses.hasNext()) {
         throw new NoSuchElementException("No more responses configured for URL: "
           + interpolatedUrl);
       }
-      return response.next();
+    }
+
+    private void requireConfiguredResponseFor(String interpolatedUrl) {
+      if (!endpointsResponses.containsKey(interpolatedUrl)) {
+        throw new NoSuchElementException("URL not configured: " + interpolatedUrl);
+      }
     }
 
   }
