@@ -7,7 +7,7 @@
 #     "temperature": 0.7
 #   }'
 POST https://api.openai.com/v1/chat/completions
-Authorization: Bearer {{openai}}
+Authorization: Bearer {{openaikey}}
 Content-Type: application/json
 
 {

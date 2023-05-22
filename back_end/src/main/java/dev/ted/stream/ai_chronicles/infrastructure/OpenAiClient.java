@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 public class OpenAiClient {
-  private static final String OPEN_AI_ENDPOINT = "https://api.openai.com/v1/chat/completions";
+  static final String OPEN_AI_ENDPOINT = "https://api.openai.com/v1/chat/completions";
+
   private JsonHttpClient httpClient;
   private final String apiKey;
 
@@ -18,8 +19,8 @@ public class OpenAiClient {
       "Authorization", "Bearer " + apiKey,
       "Content-Type", "application/json"
     );
-    httpClient.post(OPEN_AI_ENDPOINT, Void.class, headers, new PromptBody("gpt-3.5-turbo",
-      List.of(new PromptBody.Message("user", prompt)),
+    httpClient.post(OPEN_AI_ENDPOINT, Void.class, headers, new OpenAiRequestBody("gpt-3.5-turbo",
+      List.of(new OpenAiRequestBody.Message("user", prompt)),
       0.7
     ));
 

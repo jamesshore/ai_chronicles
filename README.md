@@ -49,6 +49,7 @@ Non-goals:
 * ➡️ Placeholder communication with OpenAI
 * Placeholder web page
 * Conversation with OpenAI via front-end
+* Harden communication with OpenAI (OpenAiClient error handling)
 * (Future: tbd)
 
 
