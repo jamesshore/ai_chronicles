@@ -18,6 +18,9 @@ class JsonHttpClientTest {
 
   @Test
   void nulledGetForUnconfiguredEndpointsThrowsNotFoundException() {
+    // Although Nullables typically have a useful default, that's not possible
+    // for JsonHttpClient because the response is always context-specific.
+
     JsonHttpClient jsonHttpClient = JsonHttpClient.createNull();
 
     assertThatThrownBy(() -> {
@@ -28,6 +31,9 @@ class JsonHttpClientTest {
 
   @Test
   void nulledPostForUnconfiguredEndpointThrowsNotFoundException() {
+    // Although Nullables typically have a useful default, that's not possible
+    // for JsonHttpClient because the response is always context-specific.
+
     JsonHttpClient jsonHttpClient = JsonHttpClient.createNull();
 
     assertThatThrownBy(() -> {

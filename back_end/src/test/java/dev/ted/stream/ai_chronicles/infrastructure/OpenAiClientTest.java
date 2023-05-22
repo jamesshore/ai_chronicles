@@ -14,7 +14,9 @@ class OpenAiClientTest {
 
   @Test
   void sendsPromptToOpenAi() {
-    JsonHttpClient httpClient = JsonHttpClient.createNull();
+    JsonHttpClient httpClient = JsonHttpClient.createNull(Map.of(
+      "https://api.openai.com/v1/chat/completions", "don't care about response"
+    ));
     var httpRequests = httpClient.trackRequests();
 
     OpenAiClient openAi = new OpenAiClient(httpClient, "my_api_key");
