@@ -6,8 +6,12 @@ import java.util.Map;
 public class OpenAiClient {
   static final String OPEN_AI_ENDPOINT = "https://api.openai.com/v1/chat/completions";
 
-  private JsonHttpClient httpClient;
+  private final JsonHttpClient httpClient;
   private final String apiKey;
+
+  public static OpenAiClient create(String apiKey) {
+    return new OpenAiClient(JsonHttpClient.create(), apiKey);
+  }
 
   public OpenAiClient(JsonHttpClient httpClient, String apiKey) {
     this.httpClient = httpClient;
