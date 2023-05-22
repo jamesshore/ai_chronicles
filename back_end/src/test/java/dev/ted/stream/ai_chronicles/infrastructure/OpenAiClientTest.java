@@ -1,6 +1,5 @@
 package dev.ted.stream.ai_chronicles.infrastructure;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -8,13 +7,32 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 class OpenAiClientTest {
+
+  private static final OpenAiResponseBody IRRELEVANT_RESPONSE_BODY = new OpenAiResponseBody(
+    "irrelevant_id",
+    "irrelevant_object",
+    42,
+    "irrelevant_model",
+    new Usage(
+      42,
+      42,
+      42
+    ),
+    new Choice[]{new Choice(
+      new Message(
+        "irrelevant role",
+        "my_open_ai_response"
+      ),
+      "irrelevant_reason",
+      42
+    )}
+  );
 
   @Test
   void sendsPromptToOpenAi() {
     JsonHttpClient httpClient = JsonHttpClient.createNull(Map.of(
-      OpenAiClient.OPEN_AI_ENDPOINT, "don't care about response"
+      OpenAiClient.OPEN_AI_ENDPOINT, IRRELEVANT_RESPONSE_BODY
     ));
     var httpRequests = httpClient.trackRequests();
     OpenAiClient openAi = new OpenAiClient(httpClient, "my_api_key");
@@ -35,10 +53,27 @@ class OpenAiClientTest {
   }
 
   @Test
-  @Disabled
   void parsesOpenAiResponse() {
     JsonHttpClient httpClient = JsonHttpClient.createNull(Map.of(
-      OpenAiClient.OPEN_AI_ENDPOINT, "what will be parsed here?"
+      OpenAiClient.OPEN_AI_ENDPOINT, new OpenAiResponseBody(
+        "irrelevant_id",
+        "irrelevant_object",
+        42,
+        "irrelevant_model",
+        new Usage(
+          42,
+          42,
+          42
+        ),
+        new Choice[] {new Choice(
+          new Message(
+            "irrelevant role",
+            "my_open_ai_response"
+          ),
+          "irrelevant_reason",
+          42
+        )}
+      )
     ));
     var httpRequests = httpClient.trackRequests();
     OpenAiClient openAi = new OpenAiClient(httpClient, "my_api_key");
@@ -46,7 +81,7 @@ class OpenAiClientTest {
     String message = openAi.prompt("my_prompt");
 
     assertThat(message)
-      .isEqualTo("the parsed response");
+      .isEqualTo("my_open_ai_response");
 
 
 /**
