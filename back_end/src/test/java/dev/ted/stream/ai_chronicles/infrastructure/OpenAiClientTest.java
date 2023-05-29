@@ -86,16 +86,4 @@ class OpenAiClientTest {
       .isEqualTo("my_open_ai_response");
   }
 
-  @Test
-  @Disabled
-  void deleteMe_manual_test() {
-    String API_KEY = "";
-    String PROMPT = "Pretend you have crashed on a planet populated by robots. What is the first thing you say?";
-
-    OpenAiClient openAiClient = OpenAiClient.create(API_KEY);
-    String response = openAiClient.prompt(PROMPT);
-    assertThat(response)
-      .isEqualTo("manually check response here");
-  }
-
 }
