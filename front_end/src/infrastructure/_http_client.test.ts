@@ -3,7 +3,7 @@ import http from "node:http";
 
 const PORT = 5011;
 
-export default test(({ describe, it, beforeAll, afterAll }) => {
+export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
   let server;
 
   beforeAll(async () => {
@@ -11,11 +11,28 @@ export default test(({ describe, it, beforeAll, afterAll }) => {
     await server.startAsync();
   });
 
+  beforeEach(() => {
+    server.reset();
+  });
+
   afterAll(async () => {
     await server.stopAsync();
   });
 
   it("makes HTTP requests", async () => {
+    server.setResponse({
+      status: 201,
+      headers: {
+        myResponseHeader: "header-value",
+        // prevent client from keeping connection open and preventing the server from stopping
+        connection: "close",
+      },
+      body: JSON.stringify({
+        myResponseBody: "response-body",
+      }),
+    });
+
+
     const options = {
       method: "post",
       headers: {
@@ -48,18 +65,18 @@ export default test(({ describe, it, beforeAll, afterAll }) => {
       }),
     });
 
-    assert.equal(response.status, 418);
+    assert.equal(response.status, 201);
     const headers = Object.fromEntries(response.headers.entries());
     delete headers["content-length"];
     delete headers.date;
 
     assert.deepEqual(headers, {
       connection: "close",
-      "content-type": "application/json",
+      myresponseheader: "header-value",
     });
 
     assert.deepEqual(await response.json(), {
-      body: "my_body",
+      myResponseBody: "response-body",
     });
   });
 
@@ -70,14 +87,27 @@ class SpyServer {
 
   private readonly _httpServer;
   private _lastRequest;
+  private _nextResponse;
 
   constructor() {
     this._httpServer = http.createServer();
+    this.reset();
+  }
+
+  reset() {
     this._lastRequest = null;
   }
 
   get lastRequest() {
     return this._lastRequest;
+  }
+
+  setResponse(response = {
+    status: 501,
+    headers: {},
+    body: ""
+  }) {
+    this._nextResponse = response;
   }
 
   async startAsync() {
@@ -100,12 +130,11 @@ class SpyServer {
             body,
           };
 
-
-          // prevent client from keeping connection open and preventing the server from stopping
-          response.statusCode = 418;
-          response.setHeader("connection", "close");
-          response.setHeader("content-type", "application/json");
-          response.end(JSON.stringify({ body: "my_body" }));
+          response.statusCode = this._nextResponse.status;
+          Object.entries(this._nextResponse.headers).forEach(([ key, value ]) => {
+            response.setHeader(key, value);
+          });
+          response.end(this._nextResponse.body);
         });
       });
     });
