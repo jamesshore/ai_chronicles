@@ -14,10 +14,12 @@
     "@sinonjs/fake-timers": "^10.1.0",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
+    "@types/node": "^18.15.3",
     "@types/react": "^18.2.0",
     "@types/sinonjs__fake-timers": "^8.1.2",
     "chai": "^4.3.7",
     "global-jsdom": "^9.0.1",
-    "jsdom": "^22.0.0"
+    "jsdom": "^22.0.0",
+    "typescript": "^5.0.4"
   }
 }
