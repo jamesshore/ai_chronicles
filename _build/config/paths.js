@@ -14,6 +14,7 @@ export const frontEndNodeModules = `${frontEndDir}/node_modules`;
 export const frontEndSrcDir = `${frontEndDir}/src`;
 
 export const backEndDir = `${rootDir}/back_end`;
+export const backEndResourcesDir = `${backEndDir}/src/main/resources`;
 
 export const generatedDir = `${rootDir}/generated`;
 export const incrementalDir = `${generatedDir}/incremental-build`;
@@ -21,7 +22,10 @@ export const typescriptDir = `${generatedDir}/compiled-typescript`;
 export const typescriptFrontEndDir = `${typescriptDir}/front_end`;
 export const typescriptFrontEndSrcDir = `${typescriptFrontEndDir}/src`;
 export const bundleSrc = `${typescriptDir}/front_end/src/index.js`;
-export const bundleDir = `${generatedDir}/bundle`;
+// was:
+// export const bundleDir = `${generatedDir}/bundle`;
+// for letting Spring Boot back-end serve the page/JavaScript:
+export const bundleDir = `${backEndResourcesDir}/static`;
 export const bundleFile = `${bundleDir}/bundle.js`;
 
 export const buildScript = `${rootDir}/build.sh`;
