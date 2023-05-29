@@ -47,8 +47,9 @@ Non-goals:
 ## User Stories
 
 * ✅Placeholder communication with OpenAI
-* ➡️Placeholder web page
-* Conversation with OpenAI via front-end
+* ✅Placeholder web page
+* ➡️Send prompt to OpenAI from front-end
+* Display OpenAI response in front-end
 * Harden communication with OpenAI (OpenAiClient error handling)
   * What if response doesn't have all the fields?
   * What if OpenAI doesn't like the API key?
@@ -59,7 +60,12 @@ Non-goals:
 
 ## Engineering Tasks
 
-* ✅️Hardcode the UI mockup
-* Remove <Hello> component
-* Change HTTP tests to test against JSON rather than DTO
+* React "Application" class needs to use front-end wrapper
+* Front-end wrapper for back-end service (BackEndClient?)
+* ➡️Front-end fetch() wrapper (HttpClient)
+* Back-end POST endpoint for front-end to use
+* Back-end endpoint talks to OpenAI wrapper
+
 * Move manual back-end test
+* Change HTTP tests to test against JSON rather than DTO
+* Remove <Hello> component
