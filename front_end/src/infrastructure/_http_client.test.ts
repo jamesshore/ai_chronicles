@@ -43,7 +43,26 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
         myRequestBody: "request-body",
       }),
     };
-    const response = await fetch(`http://localhost:${PORT}/my-path`, options);
+    const fetchResponse = await fetch(`http://localhost:${PORT}/my-path`, options);
+    const headers = Object.fromEntries(fetchResponse.headers.entries());
+    delete headers["content-length"];
+    delete headers.date;
+    const response = {
+      status: fetchResponse.status,
+      headers,
+      bodyAsJson: await fetchResponse.json(),
+    };
+
+    assert.deepEqual(response, {
+      status: 201,
+      headers: {
+        connection: "close",
+        myresponseheader: "header-value",
+      },
+      bodyAsJson: {
+        myResponseBody: "response-body",
+      },
+    });
 
     assert.deepEqual(server.lastRequest, {
       path: "/my-path",
@@ -63,20 +82,6 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
       body: JSON.stringify({
         myRequestBody: "request-body",
       }),
-    });
-
-    assert.equal(response.status, 201);
-    const headers = Object.fromEntries(response.headers.entries());
-    delete headers["content-length"];
-    delete headers.date;
-
-    assert.deepEqual(headers, {
-      connection: "close",
-      myresponseheader: "header-value",
-    });
-
-    assert.deepEqual(await response.json(), {
-      myResponseBody: "response-body",
     });
   });
 
