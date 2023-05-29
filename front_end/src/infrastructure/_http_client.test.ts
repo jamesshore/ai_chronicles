@@ -16,9 +16,37 @@ export default test(({ describe, it, beforeAll, afterAll }) => {
   });
 
   it("makes HTTP requests", async () => {
-    console.log("client: Making request");
-    const response = await fetch("http://localhost:" + PORT);
-    console.log("client: Request finished");
+    const options = {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+        "my-header": "my-value",
+      },
+      body: JSON.stringify({
+        myRequestBody: "request-body",
+      }),
+    };
+    const response = await fetch(`http://localhost:${PORT}/my-path`, options);
+
+    assert.deepEqual(server.lastRequest, {
+      path: "/my-path",
+      method: "POST",
+      headers: {
+        host: `localhost:${PORT}`,
+        connection: "keep-alive",
+        "content-type": "application/json",
+        "my-header": "my-value",
+        accept: "*/*",
+        "accept-language": "*",
+        "sec-fetch-mode": "cors",
+        "user-agent": "undici",
+        "accept-encoding": "gzip, deflate",
+        "content-length": "32",
+      },
+      body: JSON.stringify({
+        myRequestBody: "request-body",
+      }),
+    });
 
     assert.equal(response.status, 418);
     const headers = Object.fromEntries(response.headers.entries());
@@ -33,7 +61,6 @@ export default test(({ describe, it, beforeAll, afterAll }) => {
     assert.deepEqual(await response.json(), {
       body: "my_body",
     });
-    console.log(response);
   });
 
 });
@@ -41,50 +68,56 @@ export default test(({ describe, it, beforeAll, afterAll }) => {
 
 class SpyServer {
 
-  private readonly httpServer;
-  private lastRequest;
+  private readonly _httpServer;
+  private _lastRequest;
 
   constructor() {
-    this.httpServer = http.createServer();
-    this.lastRequest = null;
+    this._httpServer = http.createServer();
+    this._lastRequest = null;
+  }
+
+  get lastRequest() {
+    return this._lastRequest;
   }
 
   async startAsync() {
     await new Promise((resolve, reject) => {
-      this.httpServer.listen(PORT);
-      this.httpServer.on("listening", () => {
+      this._httpServer.listen(PORT);
+      this._httpServer.on("listening", () => {
         resolve();
       });
-      this.httpServer.on("request", (request, response) => {
-        console.log("server: receiving request");
-        request.resume();
-        request.on("end", () => {
-          console.log("server: request received");
+      this._httpServer.on("request", (request, response) => {
+        let body = "";
+        request.on("data", (chunk) => {
+          body += chunk;
+        });
 
-          console.log("server: sending response");
+        request.on("end", () => {
+          this._lastRequest = {
+            path: request.url,
+            method: request.method,
+            headers: request.headers,
+            body,
+          };
+
 
           // prevent client from keeping connection open and preventing the server from stopping
           response.statusCode = 418;
           response.setHeader("connection", "close");
           response.setHeader("content-type", "application/json");
           response.end(JSON.stringify({ body: "my_body" }));
-
-          console.log("server: response sent");
         });
       });
     });
-    console.log("server: started");
   }
 
   async stopAsync() {
-    console.log("server: attempting to stop");
     await new Promise((resolve, reject) => {
-      this.httpServer.close();
-      this.httpServer.on("close", () => {
+      this._httpServer.close();
+      this._httpServer.on("close", () => {
         resolve();
       });
     });
-    console.log("server: stopped");
   }
 
 }
