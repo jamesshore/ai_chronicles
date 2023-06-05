@@ -1,7 +1,18 @@
-import { test, assert } from "../util/tests.js";
+import { assert, test } from "../util/tests.js";
 import http from "node:http";
 
 const PORT = 5011;
+
+async function requestAsync({ url, method, headers, body, }) {
+  const fetchOptions = { method, headers, body };
+  const fetchResponse = await fetch(url, fetchOptions);
+
+  return {
+    status: fetchResponse.status,
+    headers: Object.fromEntries(fetchResponse.headers.entries()),
+    body: await fetchResponse.text(),
+  };
+}
 
 export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
   let server;
@@ -27,41 +38,28 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
         // prevent client from keeping connection open and preventing the server from stopping
         connection: "close",
       },
-      body: JSON.stringify({
-        myResponseBody: "response-body",
-      }),
+      body: "my_response_body",
     });
 
 
-    const options = {
+    const response = await requestAsync({
+      url: `http://localhost:${PORT}/my-path`,
       method: "post",
       headers: {
-        "content-type": "application/json",
         "my-header": "my-value",
       },
-      body: JSON.stringify({
-        myRequestBody: "request-body",
-      }),
-    };
-    const fetchResponse = await fetch(`http://localhost:${PORT}/my-path`, options);
-    const headers = Object.fromEntries(fetchResponse.headers.entries());
-    delete headers["content-length"];
-    delete headers.date;
-    const response = {
-      status: fetchResponse.status,
-      headers,
-      bodyAsJson: await fetchResponse.json(),
-    };
+      body: "my_request_body",
+    });
 
+    delete response.headers["content-length"];
+    delete response.headers.date;
     assert.deepEqual(response, {
       status: 201,
       headers: {
         connection: "close",
         myresponseheader: "header-value",
       },
-      bodyAsJson: {
-        myResponseBody: "response-body",
-      },
+      body: "my_response_body",
     });
 
     assert.deepEqual(server.lastRequest, {
@@ -70,18 +68,16 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
       headers: {
         host: `localhost:${PORT}`,
         connection: "keep-alive",
-        "content-type": "application/json",
         "my-header": "my-value",
+        "content-type": "text/plain;charset=UTF-8",
         accept: "*/*",
         "accept-language": "*",
         "sec-fetch-mode": "cors",
         "user-agent": "undici",
         "accept-encoding": "gzip, deflate",
-        "content-length": "32",
+        "content-length": "15",
       },
-      body: JSON.stringify({
-        myRequestBody: "request-body",
-      }),
+      body: "my_request_body",
     });
   });
 
