@@ -22,16 +22,7 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
     await server.stopAsync();
   });
 
-  it("makes HTTP requests", async () => {
-    server.setResponse({
-      status: 201,
-      headers: {
-        myResponseHeader: "header-value",
-      },
-      body: "my_response_body",
-    });
-
-
+  it("makes HTTP request", async () => {
     const client = new HttpClient();
     await client.requestAsync({
       url: `http://localhost:${PORT}/my-path`,
@@ -62,7 +53,7 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
     });
   });
 
-  it.skip("makes HTTP requests", async () => {
+  it("receives HTTP response", async () => {
     server.setResponse({
       status: 201,
       headers: {
@@ -73,41 +64,23 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
 
     const client = new HttpClient();
     const response = await client.requestAsync({
-      url: `http://localhost:${PORT}/my-path`,
+      url: `http://localhost:${PORT}/irrelevant_path`,
       method: "post",
-      headers: {
-        "my-header": "my-value",
-      },
-      body: "my_request_body",
+      headers: {},
+      body: "",
     });
 
-    delete response.headers["content-length"];
     delete response.headers.date;
     assert.deepEqual(response, {
       status: 201,
       headers: {
-        connection: "close",
-        myresponseheader: "header-value",
+        "myresponseheader": "header-value",
+        // default server headers
+        "connection": "keep-alive",
+        "content-length": "16",
+        "keep-alive": "timeout=5",
       },
       body: "my_response_body",
-    });
-
-    assert.deepEqual(server.lastRequest, {
-      path: "/my-path",
-      method: "POST",
-      headers: {
-        host: `localhost:${PORT}`,
-        connection: "keep-alive",
-        "my-header": "my-value",
-        "content-type": "text/plain;charset=UTF-8",
-        accept: "*/*",
-        "accept-language": "*",
-        "sec-fetch-mode": "cors",
-        "user-agent": "undici",
-        "accept-encoding": "gzip, deflate",
-        "content-length": "15",
-      },
-      body: "my_request_body",
     });
   });
 
@@ -153,8 +126,6 @@ class SpyServer {
     headers: {},
     body: ""
   }) {
-    console.log({ response });
-
     this._nextResponse = response;
   }
 
