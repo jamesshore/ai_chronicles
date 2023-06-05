@@ -33,14 +33,13 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
   });
 
   it("makes HTTP request", async () => {
-    const client = new HttpClient();
-    await client.requestAsync({
-      url: `http://localhost:${PORT}/my-path`,
+    await requestAsync({
+      path: "/my-path",
       method: "post",
       headers: {
         "my-header": "my-value",
       },
-      body: "my_request_body",
+      body: "my_request_body"
     });
 
     assert.deepEqual(server.lastRequest, {
@@ -56,10 +55,11 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
   });
 
   it("headers and body are optional", async () => {
-    const client = new HttpClient();
-    await client.requestAsync({
-      url: `http://localhost:${PORT}/my-path`,
+    await requestAsync({
+      path: `/my-path`,
       method: "post",
+      headers: undefined,
+      body: undefined,
     });
 
     assert.deepEqual(server.lastRequest, {
@@ -82,9 +82,8 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
       body: "my_response_body",
     });
 
-    const client = new HttpClient();
-    const response = await client.requestAsync({
-      url: `http://localhost:${PORT}/irrelevant_path`,
+    const { response } = await requestAsync({
+      path: "/irrelevant_path",
       method: "post",
       headers: {},
       body: "",
@@ -105,6 +104,28 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
   });
 
 });
+
+async function requestAsync({
+  path = "irrelevant_path",
+  method = "options",
+  headers = undefined,
+  body = undefined,
+}: {
+  path?: string,
+  method?: string,
+  headers?: Record<string, string>,
+  body?: string,
+} = {}) {
+  const client = new HttpClient();
+  const response = await client.requestAsync({
+    url: `http://localhost:${PORT}${path}`,
+    method: method,
+    headers: headers,
+    body: body,
+  });
+
+  return { response };
+}
 
 
 interface SpyServerRequest {
