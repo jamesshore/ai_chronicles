@@ -1,12 +1,12 @@
 import { assert, test } from "../util/tests.js";
-import http from "node:http";
 import { HttpClient } from "./http_client.js";
+import * as http from "node:http";
 
 
 const PORT = 5011;
 
 export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
-  let server;
+  let server: SpyServer;
 
   beforeAll(async () => {
     server = new SpyServer();
@@ -75,11 +75,26 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
 });
 
 
+
+
+interface SpyServerRequest {
+  path?: string,
+  method?: string,
+  headers: http.IncomingHttpHeaders,
+  body: string,
+}
+
+interface SpyServerResponse {
+  status: number,
+  headers: Record<string, string>,
+  body: string,
+}
+
 class SpyServer {
 
   private readonly _httpServer;
-  private _lastRequest;
-  private _nextResponse;
+  private _lastRequest!: null | SpyServerRequest;
+  private _nextResponse!: SpyServerResponse;
 
   constructor() {
     this._httpServer = http.createServer();
@@ -88,6 +103,7 @@ class SpyServer {
 
   reset() {
     this._lastRequest = null;
+    this.setResponse();
   }
 
   get lastRequest() {
@@ -103,14 +119,14 @@ class SpyServer {
   }
 
   async startAsync() {
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       this._httpServer.listen(PORT);
       this._httpServer.on("listening", () => {
         resolve();
       });
-      this._httpServer.on("request", (request, response) => {
+      this._httpServer.on("request", (request: http.IncomingMessage, response: http.ServerResponse) => {
         let body = "";
-        request.on("data", (chunk) => {
+        request.on("data", (chunk: Buffer) => {
           body += chunk;
         });
 
@@ -133,7 +149,7 @@ class SpyServer {
   }
 
   async stopAsync() {
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       this._httpServer.close();
       this._httpServer.on("close", () => {
         resolve();
