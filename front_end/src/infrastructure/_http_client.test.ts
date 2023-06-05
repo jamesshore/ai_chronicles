@@ -3,8 +3,18 @@ import { HttpClient } from "./http_client.js";
 import * as http from "node:http";
 import * as net from "net";
 
-
 const PORT = 5011;
+
+const DEFAULT_FETCH_REQUEST_HEADERS = {
+  "host": `localhost:${PORT}`,
+  "connection": "keep-alive",
+  "content-type": "text/plain;charset=UTF-8",
+  "accept": "*/*",
+  "accept-language": "*",
+  "sec-fetch-mode": "cors",
+  "user-agent": "undici",
+  "accept-encoding": "gzip, deflate"
+};
 
 export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
   let server: SpyServer;
@@ -38,18 +48,28 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
       method: "POST",
       headers: {
         "my-header": "my-value",
-        // fetch() adds a bunch of headers that we don't explicitly define
-        "host": `localhost:${PORT}`,
-        "connection": "keep-alive",
-        "content-type": "text/plain;charset=UTF-8",
-        "accept": "*/*",
-        "accept-language": "*",
-        "sec-fetch-mode": "cors",
-        "user-agent": "undici",
-        "accept-encoding": "gzip, deflate",
+        ...DEFAULT_FETCH_REQUEST_HEADERS,
         "content-length": "15",
       },
       body: "my_request_body",
+    });
+  });
+
+  it("headers and body are optional", async () => {
+    const client = new HttpClient();
+    await client.requestAsync({
+      url: `http://localhost:${PORT}/my-path`,
+      method: "post",
+    });
+
+    assert.deepEqual(server.lastRequest, {
+      path: "/my-path",
+      method: "POST",
+      headers: {
+        ...DEFAULT_FETCH_REQUEST_HEADERS,
+        "content-length": "0",
+      },
+      body: "",
     });
   });
 
@@ -77,8 +97,8 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
         "myresponseheader": "header-value",
         // default server headers
         "connection": "keep-alive",
-        "content-length": "16",
         "keep-alive": "timeout=5",
+        "content-length": "16",
       },
       body: "my_response_body",
     });

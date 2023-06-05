@@ -3,13 +3,13 @@ export class HttpClient {
   async requestAsync({
     url,
     method,
-    headers,
-    body,
+    headers = {},
+    body = "",
   }: {
     url: string,
     method: string,
-    headers: Record<string, string>,
-    body: string,
+    headers?: Record<string, string>,
+    body?: string,
   }): Promise<{
     status: number,
     headers: Record<string, string>,
