@@ -62,7 +62,8 @@ Non-goals:
 
 * React "Application" class needs to use front-end wrapper
 * Front-end wrapper for back-end service (BackEndClient?)
-* ➡️Front-end fetch() wrapper (HttpClient)
+* ✅Front-end fetch() wrapper (HttpClient)
+* ➡️Make HttpClient nullable
 * Back-end POST endpoint for front-end to use
 * Back-end endpoint talks to OpenAI wrapper
 
