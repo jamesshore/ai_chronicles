@@ -1,18 +1,9 @@
 import { assert, test } from "../util/tests.js";
 import http from "node:http";
+import { HttpClient } from "./http_client.js";
+
 
 const PORT = 5011;
-
-async function requestAsync({ url, method, headers, body, }) {
-  const fetchOptions = { method, headers, body };
-  const fetchResponse = await fetch(url, fetchOptions);
-
-  return {
-    status: fetchResponse.status,
-    headers: Object.fromEntries(fetchResponse.headers.entries()),
-    body: await fetchResponse.text(),
-  };
-}
 
 export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
   let server;
@@ -41,8 +32,8 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
       body: "my_response_body",
     });
 
-
-    const response = await requestAsync({
+    const client = new HttpClient();
+    const response = await client.requestAsync({
       url: `http://localhost:${PORT}/my-path`,
       method: "post",
       headers: {
