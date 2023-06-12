@@ -4,6 +4,7 @@ import * as http from "node:http";
 import * as net from "net";
 
 const PORT = 5011;
+const URL_PREFIX = `http://localhost:${PORT}`;
 
 const DEFAULT_FETCH_REQUEST_HEADERS = {
   "host": `localhost:${PORT}`,
@@ -36,7 +37,7 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
 
     it("makes HTTP request", async () => {
       await requestAsync({
-        path: "/my-path",
+        url: `${URL_PREFIX}/my-path`,
         method: "post",
         headers: {
           "my-header": "my-value",
@@ -58,7 +59,7 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
 
     it("headers and body are optional", async () => {
       await requestAsync({
-        path: `/my-path`,
+        url: `${URL_PREFIX}/my-path`,
         method: "post",
         headers: undefined,
         body: undefined,
@@ -84,12 +85,7 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
         body: "my_response_body",
       });
 
-      const { response } = await requestAsync({
-        path: "/irrelevant_path",
-        method: "post",
-        headers: {},
-        body: "",
-      });
+      const { response } = await requestAsync();
 
       delete response.headers.date;
       assert.deepEqual(response, {
@@ -107,7 +103,7 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
 
     it("tracks requests", async () => {
       const { requests } = await requestAsync({
-        path: "/my-path",
+        url: `${URL_PREFIX}/my-path`,
         method: "POST",
         headers: {
           "my-header": "my-value",
@@ -146,20 +142,20 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
 
 async function requestAsync({
   client = HttpClient.create(),
-  path = "/irrelevant_path",
-  method = "options",
+  url = `${URL_PREFIX}/irrelevant_path`,
+  method = "post",
   headers = undefined,
   body = undefined,
 }: {
   client?: HttpClient,
-  path?: string,
+  url?: string,
   method?: string,
   headers?: Record<string, string>,
   body?: string,
 } = {}) {
   const requests = client.trackRequests();
   const response = await client.requestAsync({
-    url: `http://localhost:${PORT}${path}`,
+    url,
     method: method,
     headers: headers,
     body: body,
