@@ -1,7 +1,14 @@
 export class HttpClient {
 
+  static create(): HttpClient {
+    return new HttpClient(fetch);
+  }
+
   static createNull(): HttpClient {
-    return new HttpClient();
+    return new HttpClient(stubbedFetch);
+  }
+
+  private constructor(private readonly _fetch: any) {
   }
 
   async requestAsync({
@@ -20,7 +27,7 @@ export class HttpClient {
     body: string,
   }> {
     const fetchOptions = { method, headers, body };
-    const fetchResponse = await fetch(url, fetchOptions);
+    const fetchResponse = await this._fetch(url, fetchOptions);
 
     return {
       status: fetchResponse.status,
@@ -29,7 +36,22 @@ export class HttpClient {
     };
   }
 
-  trackRequests() {
+  trackRequests(): any {
     return {};
   }
+}
+
+function stubbedFetch(): Promise<Response> {
+  const response = new Response("nulled body", {
+    status: 503,
+    headers: {
+      nulledHeader: "nulledHeaderValue",
+    },
+  });
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(response);
+    }, 0);
+  });
 }

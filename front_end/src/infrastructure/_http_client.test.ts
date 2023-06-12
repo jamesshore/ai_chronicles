@@ -16,7 +16,7 @@ const DEFAULT_FETCH_REQUEST_HEADERS = {
   "accept-encoding": "gzip, deflate"
 };
 
-export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
+export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
   let server: SpyServer;
 
   beforeAll(async () => {
@@ -32,91 +32,109 @@ export default test(({ describe, it, beforeAll, beforeEach, afterAll }) => {
     await server.stopAsync();
   });
 
-  it("makes HTTP request", async () => {
-    await requestAsync({
-      path: "/my-path",
-      method: "post",
-      headers: {
-        "my-header": "my-value",
-      },
-      body: "my_request_body"
+  describe("normal instance", ({ it }) => {
+
+    it("makes HTTP request", async () => {
+      await requestAsync({
+        path: "/my-path",
+        method: "post",
+        headers: {
+          "my-header": "my-value",
+        },
+        body: "my_request_body"
+      });
+
+      assert.deepEqual(server.lastRequest, {
+        path: "/my-path",
+        method: "POST",
+        headers: {
+          "my-header": "my-value",
+          ...DEFAULT_FETCH_REQUEST_HEADERS,
+          "content-length": "15",
+        },
+        body: "my_request_body",
+      });
     });
 
-    assert.deepEqual(server.lastRequest, {
-      path: "/my-path",
-      method: "POST",
-      headers: {
-        "my-header": "my-value",
-        ...DEFAULT_FETCH_REQUEST_HEADERS,
-        "content-length": "15",
-      },
-      body: "my_request_body",
+    it("headers and body are optional", async () => {
+      await requestAsync({
+        path: `/my-path`,
+        method: "post",
+        headers: undefined,
+        body: undefined,
+      });
+
+      assert.deepEqual(server.lastRequest, {
+        path: "/my-path",
+        method: "POST",
+        headers: {
+          ...DEFAULT_FETCH_REQUEST_HEADERS,
+          "content-length": "0",
+        },
+        body: "",
+      });
     });
+
+    it("receives HTTP response", async () => {
+      server.setResponse({
+        status: 201,
+        headers: {
+          myResponseHeader: "header-value",
+        },
+        body: "my_response_body",
+      });
+
+      const { response } = await requestAsync({
+        path: "/irrelevant_path",
+        method: "post",
+        headers: {},
+        body: "",
+      });
+
+      delete response.headers.date;
+      assert.deepEqual(response, {
+        status: 201,
+        headers: {
+          "myresponseheader": "header-value",
+          // default server headers
+          "connection": "keep-alive",
+          "keep-alive": "timeout=5",
+          "content-length": "16",
+        },
+        body: "my_response_body",
+      });
+    });
+
   });
 
-  it("headers and body are optional", async () => {
-    await requestAsync({
-      path: `/my-path`,
-      method: "post",
-      headers: undefined,
-      body: undefined,
+
+  describe("nulled instance", ({ it }) => {
+
+    it("doesn't make HTTP requests", async () => {
+      await requestAsync({
+        client: HttpClient.createNull(),
+      });
+
+      assert.equal(server.lastRequest, null);
     });
 
-    assert.deepEqual(server.lastRequest, {
-      path: "/my-path",
-      method: "POST",
-      headers: {
-        ...DEFAULT_FETCH_REQUEST_HEADERS,
-        "content-length": "0",
-      },
-      body: "",
-    });
-  });
-
-  it("receives HTTP response", async () => {
-    server.setResponse({
-      status: 201,
-      headers: {
-        myResponseHeader: "header-value",
-      },
-      body: "my_response_body",
-    });
-
-    const { response } = await requestAsync({
-      path: "/irrelevant_path",
-      method: "post",
-      headers: {},
-      body: "",
-    });
-
-    delete response.headers.date;
-    assert.deepEqual(response, {
-      status: 201,
-      headers: {
-        "myresponseheader": "header-value",
-        // default server headers
-        "connection": "keep-alive",
-        "keep-alive": "timeout=5",
-        "content-length": "16",
-      },
-      body: "my_response_body",
-    });
   });
 
 });
 
 async function requestAsync({
-  path = "irrelevant_path",
+  client = HttpClient.create(),
+  path = "/irrelevant_path",
   method = "options",
   headers = undefined,
   body = undefined,
 }: {
+  client?: HttpClient,
   path?: string,
   method?: string,
   headers?: Record<string, string>,
   body?: string,
 } = {}) {
-  const client = new HttpClient();
   const response = await client.requestAsync({
     url: `http://localhost:${PORT}${path}`,
     method: method,

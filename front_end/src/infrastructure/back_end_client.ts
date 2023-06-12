@@ -6,7 +6,7 @@ export class BackEndClient {
 
   }
 
-  say(myMessage: string): string {
+  say(myMessage: string): any {
 
   }
 }
