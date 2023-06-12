@@ -180,7 +180,7 @@ build.incrementalTask("copyFrontEndModules", [ paths.frontEndPackageJson ], asyn
 build.incrementalTask("typecheck", paths.compilerDependencies(), async () => {
 	await timeAsync(async () => {
 		process.stdout.write("Type-checking JavaScript: ");
-		const { code } = await sh.runInteractiveAsync(paths.tsc, []);
+		const { code } = await sh.runInteractiveAsync(paths.tsc, ["-p", paths.tsConfig]);
 		if (code !== 0) throw new Error("Type check failed");
 		process.stdout.write(".");
 	});

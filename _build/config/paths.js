@@ -30,6 +30,7 @@ export const bundleFile = `${bundleDir}/bundle.js`;
 
 export const buildScript = `${rootDir}/build.sh`;
 export const tsc = `${buildBinariesDir}/tsc`;
+export const tsConfig = `${frontEndDir}/tsconfig.json`;
 export const swc = `${buildBinariesDir}/swc`;
 export const rollup = `${buildBinariesDir}/rollup`;
 export const httpServer = `${buildBinariesDir}/http-server`;
