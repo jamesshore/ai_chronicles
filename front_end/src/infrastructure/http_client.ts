@@ -1,4 +1,8 @@
+import { OutputListener } from "./output_listener.js";
+
 export class HttpClient {
+
+  private _outputListener = new OutputListener<any>();
 
   static create(): HttpClient {
     return new HttpClient(fetch);
@@ -27,6 +31,7 @@ export class HttpClient {
     body: string,
   }> {
     const fetchOptions = { method, headers, body };
+    this._outputListener.emit({ url, method, headers, body });
     const fetchResponse = await this._fetch(url, fetchOptions);
 
     return {
@@ -37,7 +42,7 @@ export class HttpClient {
   }
 
   trackRequests(): any {
-    return {};
+    return this._outputListener.trackOutput();
   }
 }
 

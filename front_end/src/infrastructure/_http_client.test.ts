@@ -105,6 +105,28 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
       });
     });
 
+    it("tracks requests", async () => {
+      const { requests } = await requestAsync({
+        path: "/my-path",
+        method: "POST",
+        headers: {
+          "my-header": "my-value",
+        },
+        body: "my_request_body"
+      });
+
+      assert.deepEqual(requests.data, [{
+        url: 'http://localhost:5011/my-path',
+        method: "POST",
+        headers: {
+          "my-header": "my-value",
+        },
+        body: "my_request_body",
+      }]);
+    });
+
+    it("normalizes tracked method and header names");
+
   });
 
 
@@ -135,6 +157,7 @@ async function requestAsync({
   headers?: Record<string, string>,
   body?: string,
 } = {}) {
+  const requests = client.trackRequests();
   const response = await client.requestAsync({
     url: `http://localhost:${PORT}${path}`,
     method: method,
@@ -142,7 +165,7 @@ async function requestAsync({
     body: body,
   });
 
-  return { response };
+  return { response, requests };
 }
 
 
