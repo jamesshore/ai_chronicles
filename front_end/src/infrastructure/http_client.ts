@@ -1,8 +1,15 @@
-import { OutputListener } from "./output_listener.js";
+import { OutputListener, OutputTracker } from "./output_listener.js";
+
+export interface HttpClientOutput {
+  url: string;
+  method: string;
+  headers: Record<string, string>;
+  body: string;
+}
 
 export class HttpClient {
 
-  private _outputListener = new OutputListener<any>();
+  private _requestsListener = new OutputListener<HttpClientOutput>();
 
   static create(): HttpClient {
     return new HttpClient(fetch);
@@ -12,7 +19,7 @@ export class HttpClient {
     return new HttpClient(stubbedFetch);
   }
 
-  private constructor(private readonly _fetch: any) {
+  private constructor(private readonly _fetch: typeof fetch) {
   }
 
   async requestAsync({
@@ -30,8 +37,9 @@ export class HttpClient {
     headers: Record<string, string>,
     body: string,
   }> {
+    this._requestsListener.emit({ url, method, headers, body });
+    
     const fetchOptions = { method, headers, body };
-    this._outputListener.emit({ url, method, headers, body });
     const fetchResponse = await this._fetch(url, fetchOptions);
 
     return {
@@ -41,8 +49,8 @@ export class HttpClient {
     };
   }
 
-  trackRequests(): any {
-    return this._outputListener.trackOutput();
+  trackRequests(): OutputTracker<HttpClientOutput> {
+    return this._requestsListener.trackOutput();
   }
 }
 

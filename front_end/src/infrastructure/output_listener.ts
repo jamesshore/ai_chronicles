@@ -1,4 +1,4 @@
-class OutputTracker<T> {
+export class OutputTracker<T> {
   private _data: T[] = [];
 
   get data(): T[] {
@@ -32,4 +32,3 @@ export class OutputListener<T> {
     });
   }
 }
-

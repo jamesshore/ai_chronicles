@@ -96,6 +96,7 @@ export default {
 		"no-delete-var": ERROR,
 		"no-undef": ERROR,
 		"no-undef-init": ERROR,
+		"no-use-before-define": IGNORE,
 		"@typescript-eslint/no-use-before-define": [ ERROR, {
 			functions: false,
 			classes: false,
