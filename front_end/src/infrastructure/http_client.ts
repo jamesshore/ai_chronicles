@@ -1,5 +1,9 @@
 export class HttpClient {
 
+  static createNull(): HttpClient {
+    return new HttpClient();
+  }
+
   async requestAsync({
     url,
     method,
@@ -25,4 +29,7 @@ export class HttpClient {
     };
   }
 
+  trackRequests() {
+    return {};
+  }
 }
