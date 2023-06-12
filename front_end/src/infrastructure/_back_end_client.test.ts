@@ -4,17 +4,19 @@ import { BackEndClient } from "./back_end_client.js";
 
 export default test(({ it }) => {
 
-  it.skip("sends requests", () => {
+  it("sends requests", async () => {
     const httpClient = HttpClient.createNull();
     const httpRequests = httpClient.trackRequests();
 
     const backEndClient = new BackEndClient(httpClient);
-    backEndClient.say("my_message");
+    await backEndClient.sayAsync("my_message");
 
     assert.deepEqual(httpRequests.data, [{
-      path: "/say",
-      method: "post",
-      headers: "application/json",
+      url: "http://localhost:5020/say",
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
       body: JSON.stringify({
         message: "my_message",
       }),

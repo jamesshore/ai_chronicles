@@ -55,6 +55,7 @@ Non-goals:
   * What if OpenAI doesn't like the API key?
   * What about rate limiting?
   * or throws some other error / unexpected status?
+* Make back-end URL configurable
 * (Future: tbd)
 
 
