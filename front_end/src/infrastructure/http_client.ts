@@ -37,6 +37,9 @@ export class HttpClient {
     headers: Record<string, string>,
     body: string,
   }> {
+    method = method.toUpperCase();
+    headers = this.#normalizeHeaders(headers);
+
     this._requestsListener.emit({ url, method, headers, body });
     
     const fetchOptions = { method, headers, body };
@@ -52,6 +55,13 @@ export class HttpClient {
   trackRequests(): OutputTracker<HttpClientOutput> {
     return this._requestsListener.trackOutput();
   }
+
+  #normalizeHeaders(headers: Record<string, string>) {
+    return Object.fromEntries(
+      Object.entries(headers).map(([ key, value ]) => [ key.toLowerCase(), value ])
+    );
+  }
+
 }
 
 function stubbedFetch(): Promise<Response> {

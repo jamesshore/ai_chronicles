@@ -112,7 +112,7 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
       });
 
       assert.deepEqual(requests.data, [{
-        url: 'http://localhost:5011/my-path',
+        url: `${URL_PREFIX}/my-path`,
         method: "POST",
         headers: {
           "my-header": "my-value",
@@ -121,7 +121,25 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
       }]);
     });
 
-    it("normalizes tracked method and header names");
+    it("normalizes tracked method and header names", async () => {
+      const { requests } = await requestAsync({
+        url: `${URL_PREFIX}/my-path`,
+        method: "pOsT",
+        headers: {
+          "My-HeAdEr": "My-VaLuE",
+        },
+        body: "CASE-preserved"
+      });
+
+      assert.deepEqual(requests.data, [{
+        url: `${URL_PREFIX}/my-path`,
+        method: "POST",
+        headers: {
+          "my-header": "My-VaLuE",
+        },
+        body: "CASE-preserved",
+      }]);
+    });
 
   });
 
