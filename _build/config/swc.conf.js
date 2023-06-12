@@ -11,8 +11,8 @@ export default {
         "runtime": "automatic"
       }
     },
+    "target": "esnext",
     "baseUrl": "front_end",
-    "target": "es5",
     "loose": false,
     "externalHelpers": false,
     "keepClassNames": false
