@@ -168,27 +168,46 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
       });
     });
 
-    it("allows responses to be configured", async () => {
+    it("allows responses to be configured (one for each endpoint)", async () => {
       const client = HttpClient.createNull({
-        "https://my.host/my-endpoint": {
+        "https://my.host/endpoint/1": {
           status: 201,
           headers: {
-            "my-header": "my-value",
+            "my-header1": "my-value1",
           },
-          body: "my-response-body",
+          body: "my-response-body1",
+        },
+        "https://my.host/endpoint/2": {
+          status: 301,
+          headers: {
+            "my-header2": "my-value2",
+          },
+          body: "my-response-body2",
         },
       });
 
-      const { response } = await requestAsync({
+      const { response: response1 } = await requestAsync({
         client,
-        url: "https://my.host/my-endpoint",
+        url: "https://my.host/endpoint/1",
       });
-      assert.deepEqual(response, {
+      const { response: response2 } = await requestAsync({
+        client,
+        url: "https://my.host/endpoint/2",
+      });
+
+      assert.deepEqual(response1, {
         status: 201,
         headers: {
-          "my-header": "my-value",
+          "my-header1": "my-value1",
         },
-        body: "my-response-body",
+        body: "my-response-body1",
+      });
+      assert.deepEqual(response2, {
+        status: 301,
+        headers: {
+          "my-header2": "my-value2",
+        },
+        body: "my-response-body2",
       });
     });
 
@@ -208,10 +227,25 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
       assert.deepEqual(response.headers, {
         "content-type": "application/json",
       });
-
     });
 
-    it("allows multiple endpoints to be configured");
+    it("allows endpoints to be specified without every aspect of response", async () => {
+      const client = HttpClient.createNull({
+        "https://my.host/my-endpoint": {},
+      });
+
+      const { response } = await requestAsync({
+        client,
+        url: "https://my.host/my-endpoint",
+      });
+      assert.deepEqual(response, {
+        status: 501,
+        headers: {
+          "default_nulled_header_name": "default_nulled_header_value",
+        },
+        body: "default_nulled_HTTP_response",
+      });
+    });
 
   });
 

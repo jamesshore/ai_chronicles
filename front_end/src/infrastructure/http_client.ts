@@ -72,20 +72,19 @@ class StubbedGlobals {
   }
 
   async fetch(url): Promise<Response> {
-    const defaultResponse = {
-      status: 501,
-      headers:  {
-        default_nulled_header_name: "default_nulled_header_value",
-      },
-      body: "default_nulled_HTTP_response",
+    const DEFAULT_STATUS = 501;
+    const DEFAULT_HEADERS = {
+      default_nulled_header_name: "default_nulled_header_value",
     };
-    const configuredResponse = this._responses?.[url] ?? defaultResponse;
+    const DEFAULT_BODY = "default_nulled_HTTP_response";
 
-    const response = new Response(configuredResponse.body, {
-      status: configuredResponse.status,
-      headers: configuredResponse.headers,
+    const configuredResponse = this._responses?.[url] ?? {};
+
+    const response = new Response(configuredResponse.body ?? DEFAULT_BODY, {
+      status: configuredResponse.status ?? DEFAULT_STATUS,
+      headers: configuredResponse.headers ?? DEFAULT_HEADERS,
     });
-    if (configuredResponse.headers["content-type"] === undefined) {
+    if (configuredResponse.headers?.["content-type"] === undefined) {
       response.headers.delete("content-type");
     }
 
