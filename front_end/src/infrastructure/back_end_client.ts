@@ -8,7 +8,7 @@ export class BackEndClient {
   }
 
   async sayAsync(message: string): Promise<string> {
-    await this._httpClient.requestAsync({
+    const response = await this._httpClient.requestAsync({
       url: "http://localhost:5020/say",
       method: "post",
       headers: {
@@ -17,6 +17,7 @@ export class BackEndClient {
       body: JSON.stringify({ message }),
     });
 
-    return "tbd";
+    const parsedResponse = JSON.parse(response.body);
+    return parsedResponse.answer;
   }
 }
