@@ -163,7 +163,6 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
         status: 501,
         headers: {
           "default_nulled_header_name": "default_nulled_header_value",
-          "content-type": "text/plain;charset=UTF-8",
         },
         body: "default_nulled_HTTP_response",
       });
@@ -188,10 +187,28 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
         status: 201,
         headers: {
           "my-header": "my-value",
-          "content-type": "text/plain;charset=UTF-8",
         },
         body: "my-response-body",
       });
+    });
+
+    it("allows content-type to be configured", async () => {
+      const client = HttpClient.createNull({
+        "https://my.host/my-endpoint": {
+          headers: {
+            "content-type": "application/json",
+          },
+        },
+      });
+
+      const { response } = await requestAsync({
+        client,
+        url: "https://my.host/my-endpoint",
+      });
+      assert.deepEqual(response.headers, {
+        "content-type": "application/json",
+      });
+
     });
 
     it("allows multiple endpoints to be configured");

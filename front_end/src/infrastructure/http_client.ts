@@ -85,6 +85,9 @@ class StubbedGlobals {
       status: configuredResponse.status,
       headers: configuredResponse.headers,
     });
+    if (configuredResponse.headers["content-type"] === undefined) {
+      response.headers.delete("content-type");
+    }
 
     return new Promise((resolve) => {
       setTimeout(() => {
