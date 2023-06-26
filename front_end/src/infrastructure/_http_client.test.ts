@@ -161,9 +161,7 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
 
       assert.deepEqual(response, {
         status: 501,
-        headers: {
-          "default_nulled_header_name": "default_nulled_header_value",
-        },
+        headers: { "default_nulled_header_name": "default_nulled_header_value" },
         body: "default_nulled_HTTP_response",
       });
     });
@@ -172,16 +170,12 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
       const client = HttpClient.createNull({
         "https://my.host/endpoint/1": {
           status: 201,
-          headers: {
-            "my-header1": "my-value1",
-          },
+          headers: { "my-header1": "my-value1" },
           body: "my-response-body1",
         },
         "https://my.host/endpoint/2": {
           status: 301,
-          headers: {
-            "my-header2": "my-value2",
-          },
+          headers: { "my-header2": "my-value2" },
           body: "my-response-body2",
         },
       });
@@ -197,16 +191,12 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
 
       assert.deepEqual(response1, {
         status: 201,
-        headers: {
-          "my-header1": "my-value1",
-        },
+        headers: { "my-header1": "my-value1" },
         body: "my-response-body1",
       });
       assert.deepEqual(response2, {
         status: 301,
-        headers: {
-          "my-header2": "my-value2",
-        },
+        headers: { "my-header2": "my-value2" },
         body: "my-response-body2",
       });
     });
@@ -214,9 +204,7 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
     it("allows content-type to be configured", async () => {
       const client = HttpClient.createNull({
         "https://my.host/my-endpoint": {
-          headers: {
-            "content-type": "application/json",
-          },
+          headers: { "content-type": "my-content-type" },
         },
       });
 
@@ -225,7 +213,7 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
         url: "https://my.host/my-endpoint",
       });
       assert.deepEqual(response.headers, {
-        "content-type": "application/json",
+        "content-type": "my-content-type",
       });
     });
 
@@ -240,9 +228,7 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
       });
       assert.deepEqual(response, {
         status: 501,
-        headers: {
-          "default_nulled_header_name": "default_nulled_header_value",
-        },
+        headers: { "default_nulled_header_name": "default_nulled_header_value" },
         body: "default_nulled_HTTP_response",
       });
     });
