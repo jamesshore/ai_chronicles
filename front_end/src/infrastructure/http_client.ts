@@ -7,6 +7,21 @@ export interface HttpClientOutput {
   body: string;
 }
 
+export type NulledHttpClientEndpoints = Record<string, NulledHttpClientResponse>;
+
+export interface NulledHttpClientResponse {
+  status?: number,
+  headers?: Record<string, string>,
+  body?: string,
+}
+
+interface OurGlobals {
+  fetch(
+    url: string,
+    options: { method: string, headers: Record<string, string>, body: string }
+  ): Promise<Response>,
+}
+
 export class HttpClient {
 
   private _requestsListener = new OutputListener<HttpClientOutput>();
@@ -15,12 +30,11 @@ export class HttpClient {
     return new HttpClient(globalThis);
   }
 
-  static createNull(responses): HttpClient {
-    return new HttpClient(new StubbedGlobals(responses));
+  static createNull(endpoints? : NulledHttpClientEndpoints): HttpClient {
+    return new HttpClient(new StubbedGlobals(endpoints));
   }
 
-  private constructor(readonly theGlobals) {
-    this._globals = theGlobals;
+  private constructor(private readonly _globals: OurGlobals) {
   }
 
   async requestAsync({
@@ -68,15 +82,15 @@ export class HttpClient {
 
 class StubbedGlobals {
 
-  constructor(private readonly _responses) {
+  constructor(private readonly _endpoints?: NulledHttpClientEndpoints) {
   }
 
-  async fetch(url): Promise<Response> {
+  async fetch(url: string): Promise<Response> {
     const DEFAULT_STATUS = 501;
     const DEFAULT_HEADERS = { default_nulled_header_name: "default_nulled_header_value" };
     const DEFAULT_BODY = "default_nulled_HTTP_response";
 
-    const configuredResponse = this._responses?.[url] ?? {};
+    const configuredResponse = this._endpoints?.[url] ?? {} as NulledHttpClientResponse;
 
     const response = new Response(configuredResponse.body ?? DEFAULT_BODY, {
       status: configuredResponse.status ?? DEFAULT_STATUS,
