@@ -12,14 +12,15 @@ export class HttpClient {
   private _requestsListener = new OutputListener<HttpClientOutput>();
 
   static create(): HttpClient {
-    return new HttpClient(fetch);
+    return new HttpClient(globalThis);
   }
 
-  static createNull(): HttpClient {
-    return new HttpClient(stubbedFetch);
+  static createNull(responses): HttpClient {
+    return new HttpClient(new StubbedGlobals(responses));
   }
 
-  private constructor(private readonly _fetch: typeof fetch) {
+  private constructor(readonly theGlobals) {
+    this._globals = theGlobals;
   }
 
   async requestAsync({
@@ -43,7 +44,7 @@ export class HttpClient {
     this._requestsListener.emit({ url, method, headers, body });
     
     const fetchOptions = { method, headers, body };
-    const fetchResponse = await this._fetch(url, fetchOptions);
+    const fetchResponse = await this._globals.fetch(url, fetchOptions);
 
     return {
       status: fetchResponse.status,
@@ -64,17 +65,32 @@ export class HttpClient {
 
 }
 
-function stubbedFetch(): Promise<Response> {
-  const response = new Response("nulled body", {
-    status: 503,
-    headers: {
-      nulledHeader: "nulledHeaderValue",
-    },
-  });
 
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(response);
-    }, 0);
-  });
+class StubbedGlobals {
+
+  constructor(private readonly _responses) {
+  }
+
+  async fetch(url): Promise<Response> {
+    const defaultResponse = {
+      status: 501,
+      headers:  {
+        default_nulled_header_name: "default_nulled_header_value",
+      },
+      body: "default_nulled_HTTP_response",
+    };
+    const configuredResponse = this._responses?.[url] ?? defaultResponse;
+
+    const response = new Response(configuredResponse.body, {
+      status: configuredResponse.status,
+      headers: configuredResponse.headers,
+    });
+
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(response);
+      }, 0);
+    });
+  }
+
 }

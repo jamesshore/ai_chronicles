@@ -27,9 +27,7 @@ export default {
 	},
 
 	"globals": {
-		"globals": false,
-		"Map": false,
-		"Promise": false,
+		globalThis: "readonly",
 	},
 
 	"rules": {

@@ -111,14 +111,14 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
         body: "my_request_body"
       });
 
-      assert.deepEqual(requests.data, [{
+      assert.deepEqual(requests.data, [ {
         url: `${URL_PREFIX}/my-path`,
         method: "POST",
         headers: {
           "my-header": "my-value",
         },
         body: "my_request_body",
-      }]);
+      } ]);
     });
 
     it("normalizes tracked method and header names", async () => {
@@ -131,14 +131,14 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
         body: "CASE-preserved"
       });
 
-      assert.deepEqual(requests.data, [{
+      assert.deepEqual(requests.data, [ {
         url: `${URL_PREFIX}/my-path`,
         method: "POST",
         headers: {
           "my-header": "My-VaLuE",
         },
         body: "CASE-preserved",
-      }]);
+      } ]);
     });
 
   });
@@ -153,6 +153,48 @@ export default test(({ describe, beforeAll, beforeEach, afterAll }) => {
 
       assert.equal(server.lastRequest, null);
     });
+
+    it("returns default 'not implemented' response", async () => {
+      const { response } = await requestAsync({
+        client: HttpClient.createNull(),
+      });
+
+      assert.deepEqual(response, {
+        status: 501,
+        headers: {
+          "default_nulled_header_name": "default_nulled_header_value",
+          "content-type": "text/plain;charset=UTF-8",
+        },
+        body: "default_nulled_HTTP_response",
+      });
+    });
+
+    it("allows responses to be configured", async () => {
+      const client = HttpClient.createNull({
+        "https://my.host/my-endpoint": {
+          status: 201,
+          headers: {
+            "my-header": "my-value",
+          },
+          body: "my-response-body",
+        },
+      });
+
+      const { response } = await requestAsync({
+        client,
+        url: "https://my.host/my-endpoint",
+      });
+      assert.deepEqual(response, {
+        status: 201,
+        headers: {
+          "my-header": "my-value",
+          "content-type": "text/plain;charset=UTF-8",
+        },
+        body: "my-response-body",
+      });
+    });
+
+    it("allows multiple endpoints to be configured");
 
   });
 
