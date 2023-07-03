@@ -71,11 +71,9 @@ Non-goals:
 * ✅Finish making HttpClient nullable/testable
 * ✅Create OutputTracker
 * ✅Back-end POST /say endpoint with hardcoded response
-* ➡️Make OpenAiClient nullable
-  * ➡️observe what messages are sent
-  * configure which responses come back
+* ✅Make OpenAiClient nullable
 * Back-end endpoint talks to OpenAiClient wrapper (replaces hardcoded response)
-  * Test: /say endpoint uses OpenAiClient wrapper
+  * ➡️Test: /say endpoint uses OpenAiClient wrapper    **** DO THIS NEXT ****
 
 * Move manual back-end test
 * Change HTTP tests to test against JSON rather than DTO
