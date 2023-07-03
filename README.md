@@ -70,13 +70,10 @@ Non-goals:
 * ✅Front-end fetch() wrapper (HttpClient)
 * ✅Finish making HttpClient nullable/testable
 * ✅Create OutputTracker
-* ➡️Back-end POST /say endpoint with hardcoded response   **** WE ARE HERE ****
-  * Test: /say endpoint exists -> Spring MVC test (framework test) 
-    * reads request, returns response -> method call ("regular" test)
-      * Message In object: "message" property
-      * Returned Answer object: "answer" property
+* ✅Back-end POST /say endpoint with hardcoded response
+* ✅Make OpenAiClient nullable
 * Back-end endpoint talks to OpenAiClient wrapper (replaces hardcoded response)
-  * Test: /say endpoint uses OpenAiClient wrapper
+  * ➡️Test: /say endpoint uses OpenAiClient wrapper    **** DO THIS NEXT ****
 
 * Move manual back-end test
 * Change HTTP tests to test against JSON rather than DTO
