@@ -1,5 +1,7 @@
 package dev.ted.stream.ai_chronicles.infrastructure;
 
+import dev.ted.stream.ai_chronicles.OutputTracker;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -49,7 +51,8 @@ class OpenAiClientTest {
         0.7
       )
     );
-    assertThat(httpRequests.output()).containsExactly(expectedRequest);
+    assertThat(httpRequests.output())
+      .containsExactly(expectedRequest);
   }
 
   @Test
@@ -75,13 +78,52 @@ class OpenAiClientTest {
         )}
       )
     ));
-    var httpRequests = httpClient.trackRequests();
     OpenAiClient openAi = new OpenAiClient(httpClient, "my_api_key");
 
     String message = openAi.prompt("my_prompt");
 
     assertThat(message)
       .isEqualTo("my_open_ai_response");
+  }
+
+  @Test
+  void tracksPrompts() {
+    OpenAiClient openAi = createOpenAiClient();
+    OutputTracker<OpenAiClient.Prompt> prompts = openAi.trackPrompts();
+
+    openAi.prompt("my_prompt");
+
+    OpenAiClient.Prompt expectedPrompt = new OpenAiClient.Prompt("my_prompt");
+    assertThat(prompts.output())
+      .containsExactly(expectedPrompt);
+  }
+
+  @Test
+  void nulledClientProvidesDefaultResponse() {
+    OpenAiClient openAi = OpenAiClient.createNull();
+
+    String response = openAi.prompt("irrelevant_prompt");
+
+    assertThat(response)
+      .isEqualTo("nulled_OpenAiClient_response");
+  }
+
+  @Test
+  void nulledClientProvidesConfiguredResponse() {
+    OpenAiClient openAi = OpenAiClient.createNull("my_response");
+
+    String response = openAi.prompt("irrelevant_prompt");
+
+    assertThat(response)
+      .isEqualTo("my_response");
+  }
+
+  @NotNull
+  private static OpenAiClient createOpenAiClient() {
+    JsonHttpClient httpClient = JsonHttpClient.createNull(Map.of(
+      OpenAiClient.OPEN_AI_ENDPOINT, IRRELEVANT_RESPONSE_BODY
+    ));
+    return new OpenAiClient(httpClient, "irrelevant_api_key");
   }
 
 }
